@@ -1,268 +1,340 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Insurance Policy {{ policy.policy_number }} | Healthcare System{% endblock %}
+{% block title %}
+  Insurance Policy {{ policy.policy_number }} | Healthcare System
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'insurance:dashboard' %}">Insurance Dashboard</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'insurance:policy_list' %}">Policies</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Policy {{ policy.policy_number }}</li>
-    </ol>
-  </nav>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'insurance:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Insurance Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'insurance:policy_list' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Policies</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Policy {{ policy.policy_number }}
+          </li>
+        </ol>
+      </nav>
 
-  {% if messages %}
-    <div class="messages mb-4">
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <div class="mb-4">
-    <div class="alert alert-light border">
-      <p class="mb-1"><strong>Debug Info:</strong></p>
-      <p class="mb-0">Current Policy Status: <code>{{ policy.status }}</code> ({{ policy.get_status_display }})</p>
-    </div>
-  </div>
-
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Policy Details: {{ policy.policy_number }}</h1>
-    <div>
-      {% if policy.status == 'pending' and request.user.role == 'insurance' %}
-        <button type="button" class="btn btn-success me-2" onclick="$('#approveModal').modal('show');">
-          <i class="bi bi-check-circle me-2"></i>Approve Policy
-        </button>
-        <button type="button" class="btn btn-danger" onclick="$('#rejectModal').modal('show');">
-          <i class="bi bi-x-circle me-2"></i>Reject Policy
-        </button>
-      {% endif %}
-      <a href="{% url 'insurance:policy_list' %}" class="btn btn-outline-secondary ms-2">
-        <i class="bi bi-arrow-left me-2"></i>Back to Policies
-      </a>
-    </div>
-  </div>
-
-  <!-- Add a workflow status indicator -->
-  {% if policy.status == 'pending' %}
-  <div class="alert alert-info mb-4">
-    <div class="d-flex align-items-center">
-      <div class="me-3">
-        <i class="bi bi-info-circle fs-4"></i>
-      </div>
-      <div>
-        <h5 class="alert-heading mb-1">Verification Pending</h5>
-        <p class="mb-0">This policy requires verification. As an insurance representative, you can approve or reject this policy.</p>
-      </div>
-    </div>
-  </div>
-  {% elif policy.status == 'active' %}
-  <div class="alert alert-success mb-4">
-    <div class="d-flex align-items-center">
-      <div class="me-3">
-        <i class="bi bi-check-circle fs-4"></i>
-      </div>
-      <div>
-        <h5 class="alert-heading mb-1">Policy Active</h5>
-        <p class="mb-0">This policy has been verified and is currently active.</p>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="row">
-    <!-- Policy Information -->
-    <div class="col-lg-6 mb-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">Policy Information</h5>
-          <span class="badge {% if policy.status == 'active' %}bg-success{% elif policy.status == 'pending' %}bg-warning{% elif policy.status == 'expired' %}bg-danger{% else %}bg-secondary{% endif %}">
-            {{ policy.get_status_display }}
-          </span>
-        </div>
-        <div class="card-body">
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Policy Number:</div>
-            <div class="col-sm-8">{{ policy.policy_number }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Provider:</div>
-            <div class="col-sm-8">{{ policy.provider.name }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Member ID:</div>
-            <div class="col-sm-8">{{ policy.member_id }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Group Number:</div>
-            <div class="col-sm-8">{{ policy.group_number|default:"Not provided" }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Valid Period:</div>
-            <div class="col-sm-8">{{ policy.start_date|date:"M d, Y" }} to {{ policy.end_date|date:"M d, Y" }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Created:</div>
-            <div class="col-sm-8">{{ policy.created_at|date:"M d, Y" }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Last Updated:</div>
-            <div class="col-sm-8">{{ policy.updated_at|date:"M d, Y" }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Patient & Coverage Information -->
-    <div class="col-lg-6 mb-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-white">
-          <h5 class="card-title mb-0">Patient & Coverage Details</h5>
-        </div>
-        <div class="card-body">
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Patient:</div>
-            <div class="col-sm-8">{{ policy.patient.user.get_full_name }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Email:</div>
-            <div class="col-sm-8">{{ policy.patient.user.email }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Coverage %:</div>
-            <div class="col-sm-8">{{ policy.coverage_percentage }}%</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Deductible:</div>
-            <div class="col-sm-8">${{ policy.deductible }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Co-Pay:</div>
-            <div class="col-sm-8">${{ policy.co_pay }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Out-of-Pocket Max:</div>
-            <div class="col-sm-8">${{ policy.out_of_pocket_max }}</div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-sm-4 text-muted">Coverage Details:</div>
-            <div class="col-sm-8">{{ policy.coverage_details|linebreaks }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Insurance Claims -->
-  <div class="card shadow-sm mb-4">
-   
-    <div class="card-body p-0">
-      {% if claims %}
-        <div class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Claim #</th>
-                <th>Service Date</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for claim in claims %}
-                <tr>
-                  <td>{{ claim.claim_number }}</td>
-                  <td>{{ claim.service_date|date:"M d, Y" }}</td>
-                  <td>${{ claim.claim_amount }}</td>
-                  <td>
-                    <span class="badge {% if claim.approval_status == 'approved' %}bg-success{% elif claim.approval_status == 'pending' %}bg-warning{% elif claim.approval_status == 'rejected' %}bg-danger{% elif claim.approval_status == 'partial' %}bg-info{% else %}bg-secondary{% endif %}">
-                      {{ claim.get_approval_status_display }}
-                    </span>
-                  </td>
-                  <td>
-                    <a href="{% url 'insurance:claim_detail' claim.id %}" class="btn btn-sm btn-outline-primary">View</a>
-                    {% if claim.approval_status == 'pending' and request.user.role == 'insurance' %}
-                      <a href="{% url 'insurance:process_claim' claim.id %}" class="btn btn-sm btn-outline-success">Process</a>
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
         </div>
       {% endif %}
-    </div>
-  </div>
-</div>
 
-<!-- Approve Modal -->
-<div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <!-- Important: Make sure the form action is empty or points to the current URL -->
-      <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="approve">
-        <div class="modal-header">
-          <h5 class="modal-title">Approve Policy</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <!-- Debug Info -->
+      <div class="mb-6">
+        <div class="bg-gray-50 border-l-4 border-gray-300 p-4 rounded-xl">
+          <p class="mb-2 text-gray-900 text-base"><strong>Debug Info:</strong></p>
+          <p class="mb-0 text-gray-700 text-base">Current Policy Status: <code class="bg-gray-200 px-1 rounded">{{ policy.status }}</code> ({{ policy.get_status_display }})</p>
         </div>
-        <div class="modal-body">
-          <p>Are you sure you want to approve this insurance policy?</p>
-          <ul class="list-unstyled">
-            <li><strong>Patient:</strong> {{ policy.patient.user.get_full_name }}</li>
-            <li><strong>Policy Number:</strong> {{ policy.policy_number }}</li>
-            <li><strong>Member ID:</strong> {{ policy.member_id }}</li>
-          </ul>
-          <div class="mb-3">
-            <label for="notes-approve" class="form-label">Notes (optional)</label>
-            <textarea class="form-control" id="notes-approve" name="notes" rows="3"></textarea>
+      </div>
+
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Policy Details: {{ policy.policy_number }}
+        </h1>
+        <div class="flex gap-3">
+          {% if policy.status == 'pending' and request.user.role == 'insurance' %}
+            <button type="button" class="inline-flex items-center px-4 py-2 bg-green-500 text-white text-base font-semibold rounded-xl shadow-md hover:bg-green-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-green-200 transition-all duration-300" onclick="$('#approveModal').modal('show');">
+              <i class="bi bi-check-circle mr-2"></i>Approve Policy
+            </button>
+            <button type="button" class="inline-flex items-center px-4 py-2 bg-red-500 text-white text-base font-semibold rounded-xl shadow-md hover:bg-red-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-red-200 transition-all duration-300" onclick="$('#rejectModal').modal('show');">
+              <i class="bi bi-x-circle mr-2"></i>Reject Policy
+            </button>
+          {% endif %}
+          <a href="{% url 'insurance:policy_list' %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+            <i class="bi bi-arrow-left mr-2"></i>Back to Policies
+          </a>
+        </div>
+      </div>
+
+      <!-- Workflow Status Indicator -->
+      {% if policy.status == 'pending' %}
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-xl mb-6">
+          <div class="flex items-start">
+            <i class="bi bi-info-circle text-blue-600 text-xl mr-3"></i>
+            <div>
+              <h5 class="text-base font-semibold text-blue-900 mb-1">Verification Pending</h5>
+              <p class="text-gray-700 text-base mb-0">This policy requires verification. As an insurance representative, you can approve or reject this policy.</p>
+            </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success">Approve Policy</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Reject Modal -->
-<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form action="" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="reject">
-        <div class="modal-header">
-          <h5 class="modal-title">Reject Policy</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>Are you sure you want to reject this insurance policy?</p>
-          <ul class="list-unstyled">
-            <li><strong>Patient:</strong> {{ policy.patient.user.get_full_name }}</li>
-            <li><strong>Policy Number:</strong> {{ policy.policy_number }}</li>
-            <li><strong>Member ID:</strong> {{ policy.member_id }}</li>
-          </ul>
-          <div class="mb-3">
-            <label for="notes-reject" class="form-label">Reason for rejection (required)</label>
-            <textarea class="form-control" id="notes-reject" name="notes" rows="3" required></textarea>
+      {% elif policy.status == 'active' %}
+        <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-xl mb-6">
+          <div class="flex items-start">
+            <i class="bi bi-check-circle text-green-600 text-xl mr-3"></i>
+            <div>
+              <h5 class="text-base font-semibold text-green-800 mb-1">Policy Active</h5>
+              <p class="text-gray-700 text-base mb-0">This policy has been verified and is currently active.</p>
+            </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger">Reject Policy</button>
+      {% endif %}
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Policy Information -->
+        <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+          <div class="flex justify-between items-center mb-6">
+            <h5 class="text-xl font-semibold text-blue-900 mb-0">Policy Information</h5>
+            <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full {% if policy.status == 'active' %}bg-green-200 text-green-800{% elif policy.status == 'pending' %}bg-yellow-200 text-yellow-800{% elif policy.status == 'expired' %}bg-red-200 text-red-800{% else %}bg-gray-200 text-gray-800{% endif %}">
+              {{ policy.get_status_display }}
+            </span>
+          </div>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Policy Number:</div>
+              <div class="col-span-2 text-gray-900 text-base">{{ policy.policy_number }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Provider:</div>
+              <div class="col-span-2 text-gray-900 text-base">{{ policy.provider.name }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Member ID:</div>
+              <div class="col-span-2 text-gray-900 text-base">{{ policy.member_id }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Group Number:</div>
+              <div class="col-span-2 text-gray-900 text-base">{{ policy.group_number|default:"Not provided" }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Valid Period:</div>
+              <div class="col-span-2 text-gray-900 text-base">{{ policy.start_date|date:"M d, Y" }} to {{ policy.end_date|date:"M d, Y" }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Created:</div>
+              <div class="col-span-2 text-gray-900 text-base">{{ policy.created_at|date:"M d, Y" }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Last Updated:</div>
+              <div class="col-span-2 text-gray-900 text-base">{{ policy.updated_at|date:"M d, Y" }}</div>
+            </div>
+          </div>
         </div>
-      </form>
+
+        <!-- Patient & Coverage Information -->
+        <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+          <h5 class="text-xl font-semibold text-blue-900 mb-6">Patient & Coverage Details</h5>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Patient:</div>
+              <div class="col-span-2 text-gray-900 text-base">{{ policy.patient.user.get_full_name }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Email:</div>
+              <div class="col-span-2 text-gray-900 text-base">{{ policy.patient.user.email }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Coverage %:</div>
+              <div class="col-span-2 text-gray-900 text-base">{{ policy.coverage_percentage }}%</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Deductible:</div>
+              <div class="col-span-2 text-gray-900 text-base">${{ policy.deductible }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Co-Pay:</div>
+              <div class="col-span-2 text-gray-900 text-base">${{ policy.co_pay }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Out-of-Pocket Max:</div>
+              <div class="col-span-2 text-gray-900 text-base">${{ policy.out_of_pocket_max }}</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="text-gray-600 text-base">Coverage Details:</div>
+              <div class="col-span-2 text-gray-900 text-base leading-relaxed">{{ policy.coverage_details|linebreaks }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insurance Claims -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <div class="flex justify-between items-center mb-6">
+          <h5 class="text-xl font-semibold text-blue-900 mb-0">Insurance Claims</h5>
+        </div>
+        <div class="p-0">
+          {% if claims %}
+            <div class="overflow-x-auto">
+              <table class="w-full divide-y divide-gray-100">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Claim #</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Service Date</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Amount</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Status</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  {% for claim in claims %}
+                    <tr class="hover:bg-gray-50 transition-all duration-200">
+                      <td class="px-6 py-4 text-gray-700 text-base">{{ claim.claim_number }}</td>
+                      <td class="px-6 py-4 text-gray-700 text-base">{{ claim.service_date|date:"M d, Y" }}</td>
+                      <td class="px-6 py-4 text-gray-700 text-base">${{ claim.claim_amount }}</td>
+                      <td class="px-6 py-4">
+                        <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full {% if claim.approval_status == 'approved' %}bg-green-200 text-green-800{% elif claim.approval_status == 'pending' %}bg-yellow-200 text-yellow-800{% elif claim.approval_status == 'rejected' %}bg-red-200 text-red-800{% elif claim.approval_status == 'partial' %}bg-blue-200 text-blue-800{% else %}bg-gray-200 text-gray-800{% endif %}">
+                          {{ claim.get_approval_status_display }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                          <a href="{% url 'insurance:claim_detail' claim.id %}" class="inline-flex items-center px-3 py-2 border-2 border-blue-600 text-blue-600 text-sm font-semibold rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-all duration-300">
+                            View
+                          </a>
+                          {% if claim.approval_status == 'pending' and request.user.role == 'insurance' %}
+                            <a href="{% url 'insurance:process_claim' claim.id %}" class="inline-flex items-center px-3 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-green-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-green-200 transition-all duration-300">
+                              Process
+                            </a>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-center py-10">
+              <i class="bi bi-file-earmark-text text-gray-400 text-5xl"></i>
+              <p class="mt-4 text-gray-700 text-base mb-0">No insurance claims found for this policy.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Approve Modal -->
+    <div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content rounded-3xl">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="approve">
+            <div class="modal-header border-b border-gray-100 p-4 sm:p-6">
+              <h5 class="text-xl font-semibold text-blue-900 mb-0">Approve Policy</h5>
+              <button type="button" class="text-gray-600 hover:text-gray-800 focus:outline-none" data-bs-dismiss="modal" aria-label="Close">
+                <i class="bi bi-x-lg text-lg"></i>
+              </button>
+            </div>
+            <div class="modal-body p-4 sm:p-6">
+              <p class="text-gray-700 text-base mb-4">Are you sure you want to approve this insurance policy?</p>
+              <ul class="list-none space-y-2 mb-4">
+                <li><strong class="text-blue-900">Patient:</strong> {{ policy.patient.user.get_full_name }}</li>
+                <li><strong class="text-blue-900">Policy Number:</strong> {{ policy.policy_number }}</li>
+                <li><strong class="text-blue-900">Member ID:</strong> {{ policy.member_id }}</li>
+              </ul>
+              <div class="mb-4">
+                <label for="notes-approve" class="block text-base font-semibold text-blue-900 mb-2">Notes (optional)</label>
+                <textarea class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="notes-approve" name="notes" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer border-t border-gray-100 p-4 sm:p-6">
+              <button type="button" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-500 text-white text-base font-semibold rounded-xl shadow-md hover:bg-green-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-green-200 transition-all duration-300">
+                Approve Policy
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content rounded-3xl">
+          <form action="" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reject">
+            <div class="modal-header border-b border-gray-100 p-4 sm:p-6">
+              <h5 class="text-xl font-semibold text-blue-900 mb-0">Reject Policy</h5>
+              <button type="button" class="text-gray-600 hover:text-gray-800 focus:outline-none" data-bs-dismiss="modal" aria-label="Close">
+                <i class="bi bi-x-lg text-lg"></i>
+              </button>
+            </div>
+            <div class="modal-body p-4 sm:p-6">
+              <p class="text-gray-700 text-base mb-4">Are you sure you want to reject this insurance policy?</p>
+              <ul class="list-none space-y-2 mb-4">
+                <li><strong class="text-blue-900">Patient:</strong> {{ policy.patient.user.get_full_name }}</li>
+                <li><strong class="text-blue-900">Policy Number:</strong> {{ policy.policy_number }}</li>
+                <li><strong class="text-blue-900">Member ID:</strong> {{ policy.member_id }}</li>
+              </ul>
+              <div class="mb-4">
+                <label for="notes-reject" class="block text-base font-semibold text-blue-900 mb-2">Reason for rejection (required)</label>
+                <textarea class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="notes-reject" name="notes" rows="3" required></textarea>
+              </div>
+            </div>
+            <div class="modal-footer border-t border-gray-100 p-4 sm:p-6">
+              <button type="button" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-500 text-white text-base font-semibold rounded-xl shadow-md hover:bg-red-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-red-200 transition-all duration-300">
+                Reject Policy
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
 {% endblock %}

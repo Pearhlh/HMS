@@ -1,58 +1,164 @@
-<!-- Add this somewhere in your file if it doesn't already exist -->
+{% extends "base.html" %}
+{% load static %}
 
-<form method="post" class="mt-4">
-  {% csrf_token %}
-  
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-white">
-      <h5 class="card-title mb-0">Process Claim</h5>
-    </div>
-    <div class="card-body">
-      <div class="mb-3">
-        <label class="form-label">Approval Status</label>
-        <div class="btn-group d-flex" role="group" style="width: 100%;">
-          <input type="radio" class="btn-check" name="approval_status" id="status-approved" value="approved" autocomplete="off">
-          <label class="btn btn-outline-success" for="status-approved">Approve</label>
-          
-          <input type="radio" class="btn-check" name="approval_status" id="status-partial" value="partial" autocomplete="off">
-          <label class="btn btn-outline-primary" for="status-partial">Partial Approval</label>
-          
-          <input type="radio" class="btn-check" name="approval_status" id="status-rejected" value="rejected" autocomplete="off">
-          <label class="btn btn-outline-danger" for="status-rejected">Reject</label>
+{% block title %}
+  Process Claim {{ claim.claim_number }} | Healthcare System
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'insurance:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Insurance Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'insurance:policy_list' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Policies</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'insurance:policy_detail' claim.policy.id %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Policy {{ claim.policy.policy_number }}</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Process Claim {{ claim.claim_number }}
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
         </div>
+      {% endif %}
+
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Process Claim: {{ claim.claim_number }}
+        </h1>
+        <a href="{% url 'insurance:claim_detail' claim.id %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+          <i class="bi bi-arrow-left mr-2"></i>Back to Claim
+        </a>
       </div>
-      
-      <div id="approval-amount-section" class="mb-3">
-        <label for="approved_amount" class="form-label">Approved Amount ($)</label>
-        <input type="number" class="form-control" id="approved_amount" name="approved_amount" step="0.01" value="{{ claim.claim_amount }}">
-        <div class="form-text">Enter the amount to be covered by insurance</div>
+
+      <!-- Claim Processing Form -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <h5 class="text-xl font-semibold text-blue-900 mb-6">Process Claim</h5>
+        <form method="post" class="space-y-6">
+          {% csrf_token %}
+          
+          <div class="mb-4">
+            <label class="block text-base font-semibold text-blue-900 mb-2">Approval Status</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input type="radio" class="hidden peer/approved" name="approval_status" id="status-approved" value="approved" autocomplete="off">
+              <label for="status-approved" class="flex-1 px-4 py-3 border-2 border-green-500 text-green-500 text-base font-semibold rounded-xl text-center cursor-pointer peer-checked/approved:bg-green-500 peer-checked/approved:text-white hover:bg-green-50 hover:text-green-600 transition-all duration-300">
+                Approve
+              </label>
+
+              <input type="radio" class="hidden peer/partial" name="approval_status" id="status-partial" value="partial" autocomplete="off">
+              <label for="status-partial" class="flex-1 px-4 py-3 border-2 border-blue-600 text-blue-600 text-base font-semibold rounded-xl text-center cursor-pointer peer-checked/partial:bg-blue-600 peer-checked/partial:text-white hover:bg-blue-50 hover:text-blue-700 transition-all duration-300">
+                Partial Approval
+              </label>
+
+              <input type="radio" class="hidden peer/rejected" name="approval_status" id="status-rejected" value="rejected" autocomplete="off">
+              <label for="status-rejected" class="flex-1 px-4 py-3 border-2 border-red-500 text-red-500 text-base font-semibold rounded-xl text-center cursor-pointer peer-checked/rejected:bg-red-500 peer-checked/rejected:text-white hover:bg-red-50 hover:text-red-600 transition-all duration-300">
+                Reject
+              </label>
+            </div>
+          </div>
+
+          <div id="approval-amount-section" class="mb-4">
+            <label for="approved_amount" class="block text-base font-semibold text-blue-900 mb-2">Approved Amount ($)</label>
+            <input type="number" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="approved_amount" name="approved_amount" step="0.01" value="{{ claim.claim_amount }}">
+            <div class="text-gray-600 text-sm mt-1">Enter the amount to be covered by insurance</div>
+          </div>
+
+          <div class="mb-4">
+            <label for="notes" class="block text-base font-semibold text-blue-900 mb-2">Notes</label>
+            <textarea class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="notes" name="notes" rows="3"></textarea>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <a href="{% url 'insurance:claim_detail' claim.id %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+              Cancel
+            </a>
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow">
+              Submit
+            </button>
+          </div>
+        </form>
       </div>
-      
-      <div class="mb-3">
-        <label for="notes" class="form-label">Notes</label>
-        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
-      </div>
-    </div>
-    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-      <a href="{% url 'insurance:claim_detail' claim.id %}" class="btn btn-secondary">Cancel</a>
-      <button type="submit" class="btn btn-primary">Submit</button>
     </div>
   </div>
-</form>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const approvalInputs = document.querySelectorAll('input[name="approval_status"]');
-    const amountSection = document.getElementById('approval-amount-section');
-    
-    approvalInputs.forEach(input => {
-      input.addEventListener('change', function() {
-        if (this.value === 'approved' || this.value === 'partial') {
-          amountSection.style.display = 'block';
-        } else {
-          amountSection.style.display = 'none';
-        }
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const approvalInputs = document.querySelectorAll('input[name="approval_status"]');
+      const amountSection = document.getElementById('approval-amount-section');
+      
+      approvalInputs.forEach(input => {
+        input.addEventListener('change', function() {
+          if (this.value === 'approved' || this.value === 'partial') {
+            amountSection.style.display = 'block';
+          } else {
+            amountSection.style.display = 'none';
+          }
+        });
       });
     });
-  });
-</script>
+  </script>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
+{% endblock %}

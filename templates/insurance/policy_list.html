@@ -1,109 +1,165 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Insurance Policies | Healthcare System{% endblock %}
+{% block title %}
+  Insurance Policies | Healthcare System
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Insurance Policies</h1>
-    <div>
-      <a href="{% url 'insurance:dashboard' %}" class="btn btn-outline-secondary me-2">
-        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
-      </a>
-    </div>
-  </div>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Insurance Policies
+        </h1>
+        <a href="{% url 'insurance:dashboard' %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+          <i class="bi bi-arrow-left mr-2"></i>Back to Dashboard
+        </a>
+      </div>
 
-  {% if messages %}
-    <div class="messages mb-4">
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <!-- Filters -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-white">
-      <h5 class="card-title mb-0">Search & Filter</h5>
-    </div>
-    <div class="card-body">
-      <form method="get" class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label">Search</label>
-          <input type="text" class="form-control" name="search" value="{{ search_term }}" placeholder="Search by policy number, patient name...">
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Status</label>
-          <select class="form-select" name="status">
-            <option value="">All Statuses</option>
-            {% for status_code, status_label in status_choices %}
-              <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>{{ status_label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
-          <button type="submit" class="btn btn-primary w-100">
-            <i class="bi bi-search me-2"></i>Filter
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Policy List -->
-  <div class="card shadow-sm">
-    <div class="card-header bg-white">
-      <h5 class="card-title mb-0">Policies</h5>
-    </div>
-    <div class="card-body p-0">
-      {% if policies %}
-        <div class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Policy Number</th>
-                <th>Patient</th>
-                <th>Provider</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for policy in policies %}
-                <tr>
-                  <td>{{ policy.policy_number }}</td>
-                  <td>{{ policy.patient.user.get_full_name }}</td>
-                  <td>{{ policy.provider.name }}</td>
-                  <td>{{ policy.start_date|date:"M d, Y" }}</td>
-                  <td>{{ policy.end_date|date:"M d, Y" }}</td>
-                  <td>
-                    <span class="badge {% if policy.status == 'active' %}bg-success{% elif policy.status == 'pending' %}bg-warning{% elif policy.status == 'expired' %}bg-danger{% else %}bg-secondary{% endif %}">
-                      {{ policy.get_status_display }}
-                    </span>
-                  </td>
-                  <td>
-                    <a href="{% url 'insurance:policy_detail' policy.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
-                    {% if policy.status == 'pending' and request.user.role == 'insurance' %}
-                      <a href="{% url 'insurance:policy_detail' policy.id %}" class="btn btn-sm btn-outline-success">Review</a>
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="text-center py-5">
-          <p class="text-muted mb-0">No insurance policies found.</p>
-          {% if search_term or status_filter %}
-            <p class="text-muted">Try adjusting your search filters.</p>
-          {% endif %}
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
         </div>
       {% endif %}
+
+      <!-- Filters -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-8 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <h5 class="text-xl font-semibold text-blue-900 mb-4">Search & Filter</h5>
+        <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <div class="md:col-span-6">
+            <label class="block text-base font-semibold text-blue-900 mb-2">Search</label>
+            <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" name="search" value="{{ search_term }}" placeholder="Search by policy number, patient name...">
+          </div>
+          <div class="md:col-span-4">
+            <label class="block text-base font-semibold text-blue-900 mb-2">Status</label>
+            <select class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" name="status">
+              <option value="">All Statuses</option>
+              {% for status_code, status_label in status_choices %}
+                <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>{{ status_label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="md:col-span-2 flex items-end">
+            <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow">
+              <i class="bi bi-search mr-2"></i>Filter
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Policy List -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <div class="flex justify-between items-center mb-6">
+          <h5 class="text-xl font-semibold text-blue-900 mb-0">Policies</h5>
+        </div>
+        <div class="p-0">
+          {% if policies %}
+            <div class="overflow-x-auto">
+              <table class="w-full divide-y divide-gray-100">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Policy Number</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Patient</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Provider</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Start Date</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">End Date</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Status</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  {% for policy in policies %}
+                    <tr class="hover:bg-gray-50 transition-all duration-200">
+                      <td class="px-6 py-4 text-gray-700 text-base">{{ policy.policy_number }}</td>
+                      <td class="px-6 py-4 text-gray-700 text-base">{{ policy.patient.user.get_full_name }}</td>
+                      <td class="px-6 py-4 text-gray-700 text-base">{{ policy.provider.name }}</td>
+                      <td class="px-6 py-4 text-gray-700 text-base">{{ policy.start_date|date:"M d, Y" }}</td>
+                      <td class="px-6 py-4 text-gray-700 text-base">{{ policy.end_date|date:"M d, Y" }}</td>
+                      <td class="px-6 py-4">
+                        <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full {% if policy.status == 'active' %}bg-green-200 text-green-800{% elif policy.status == 'pending' %}bg-yellow-200 text-yellow-800{% elif policy.status == 'expired' %}bg-red-200 text-red-800{% else %}bg-gray-200 text-gray-800{% endif %}">
+                          {{ policy.get_status_display }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                          <a href="{% url 'insurance:policy_detail' policy.id %}" class="inline-flex items-center px-3 py-2 border-2 border-blue-600 text-blue-600 text-sm font-semibold rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-all duration-300">
+                            View Details
+                          </a>
+                          {% if policy.status == 'pending' and request.user.role == 'insurance' %}
+                            <a href="{% url 'insurance:policy_detail' policy.id %}" class="inline-flex items-center px-3 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-green-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-green-200 transition-all duration-300">
+                              Review
+                            </a>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-center py-10">
+              <i class="bi bi-shield-check text-gray-400 text-5xl"></i>
+              <p class="mt-4 text-gray-700 text-base mb-0">No insurance policies found.</p>
+              {% if search_term or status_filter %}
+                <p class="text-gray-600 text-sm mt-2">Try adjusting your search filters.</p>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
 {% endblock %}
