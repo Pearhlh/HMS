@@ -1,88 +1,128 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Nurse Dashboard | Healthcare System{% endblock %}
+{% block title %}
+  Nurse Dashboard | Healthcare System
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Nurse Dashboard</h1>
-    <div class="text-muted">
-      Welcome, {{ user.get_full_name }}
-    </div>
-  </div>
-
-  {% if messages %}
-    <div class="messages mb-4">
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <div class="row">
-    <div class="col-md-8">
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white">
-         
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Nurse Dashboard
+        </h1>
+        <div class="text-gray-600 text-base">
+          Welcome, {{ user.get_full_name }}
         </div>
-        
       </div>
-    </div>
 
-    <div class="col-md-8">
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white">
-          <h5 class="card-title mb-0">Recent Vitals Updates</h5>
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
         </div>
-        <div class="card-body p-0">
-          <div class="list-group list-group-flush">
-            {% for patient in recent_patients %}
-              <a href="{% url 'nurse:patient_detail' patient.id %}" class="list-group-item list-group-item-action">
-                <div class="d-flex w-100 justify-content-between">
-                  <h6 class="mb-1">{{ patient.user.get_full_name }}</h6>
-                  <small class="text-muted">
-                    {{ patient.vitals.first.recorded_at|timesince }} ago
-                  </small>
+      {% endif %}
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <!-- Recent Vitals Updates -->
+        <div class="md:col-span-8">
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+            <h5 class="text-xl font-semibold text-blue-900 mb-6">Recent Vitals Updates</h5>
+            <div class="space-y-2">
+              {% for patient in recent_patients %}
+                <a href="{% url 'nurse:patient_detail' patient.id %}" class="block p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-200">
+                  <div class="flex justify-between items-center">
+                    <h6 class="text-base font-semibold text-blue-900 mb-1">{{ patient.user.get_full_name }}</h6>
+                    <small class="text-gray-600 text-sm">
+                      {{ patient.vitals.first.recorded_at|timesince }} ago
+                    </small>
+                  </div>
+                  <p class="text-gray-700 text-sm mb-0">
+                    Temp: {{ patient.vitals.first.temperature }}°C | 
+                    BP: {{ patient.vitals.first.blood_pressure }} mmHg | 
+                    HR: {{ patient.vitals.first.heart_rate }} bpm
+                  </p>
+                </a>
+              {% empty %}
+                <div class="text-center py-10">
+                  <i class="bi bi-heart-pulse text-gray-400 text-5xl"></i>
+                  <p class="mt-4 text-gray-700 text-base mb-0">No recent vitals updates found.</p>
+                  <small class="text-gray-600 text-sm">Start recording vitals for your patients.</small>
                 </div>
-                <p class="mb-1 small">
-                  Temp: {{ patient.vitals.first.temperature }}°C | 
-                  BP: {{ patient.vitals.first.blood_pressure }} mmHg | 
-                  HR: {{ patient.vitals.first.heart_rate }} bpm
-                </p>
+              {% endfor %}
+            </div>
+            <div class="mt-6">
+              <a href="{% url 'nurse:patient_list' %}" class="inline-flex items-center px-4 py-2 border-2 border-blue-600 text-blue-600 text-base font-semibold rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all duration-300">
+                View All Patients
               </a>
-            {% empty %}
-              <div class="list-group-item text-center py-4">
-                <p class="mb-0">No recent vitals updates found.</p>
-                <small class="text-muted">Start recording vitals for your patients.</small>
-              </div>
-            {% endfor %}
+            </div>
           </div>
         </div>
-        <div class="card-footer bg-white">
-          <a href="{% url 'nurse:patient_list' %}" class="btn btn-outline-primary">View All Patients</a>
-        </div>
-      </div>
-    </div>
 
-    <div class="col-md-4">
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white">
-          <h5 class="card-title mb-0">Quick Links</h5>
-        </div>
-        <div class="card-body">
-          <div class="list-group">
-            <a href="{% url 'nurse:patient_list' %}" class="list-group-item list-group-item-action">
-              <i class="bi bi-people me-2"></i> Patient List
-            </a>
-          
-            </a>
-           
-            </a>
+        <!-- Quick Links -->
+        <div class="md:col-span-4">
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+            <h5 class="text-xl font-semibold text-blue-900 mb-6">Quick Links</h5>
+            <div class="space-y-3">
+              <a href="{% url 'nurse:patient_list' %}" class="block px-4 py-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-200">
+                <i class="bi bi-people mr-2 text-blue-600"></i>
+                <span class="text-gray-900 text-base">Patient List</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
 {% endblock %}
