@@ -1,87 +1,132 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Vital Signs | Healthcare System{% endblock %}
+{% block title %}
+  Vital Signs | Healthcare System
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Vital Signs Record</h1>
-    <a href="{% url 'patient:dashboard' %}" class="btn btn-outline-secondary">
-      <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
-    </a>
-  </div>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Vital Signs Record
+        </h1>
+        <a href="{% url 'patient:dashboard' %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+          <i class="bi bi-arrow-left mr-2"></i>Back to Dashboard
+        </a>
+      </div>
 
-  {% if messages %}
-    <div class="messages mb-4">
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <div class="row">
-    <div class="col-lg-8">
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">Vital Signs</h5>
-          <p class="text-muted mb-0">Recorded: {{ vitals.recorded_at|date:"F j, Y g:i A" }}</p>
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
         </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <div class="card">
-                <div class="card-body p-3 text-center">
-                  <h6 class="text-muted mb-1">Temperature</h6>
-                  <h3>{{ vitals.temperature }}°C</h3>
-                </div>
+      {% endif %}
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Vital Signs Card -->
+        <div class="col-span-2">
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+            <div class="flex justify-between items-center mb-6">
+              <h5 class="text-xl font-semibold text-blue-900 mb-0">Vital Signs</h5>
+              <p class="text-gray-600 text-base mb-0">Recorded: {{ vitals.recorded_at|date:"F j, Y g:i A" }}</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- Temperature -->
+              <div class="bg-gray-50 rounded-xl p-4 text-center">
+                <h6 class="text-gray-500 text-sm mb-2">Temperature</h6>
+                <h3 class="text-2xl font-semibold text-blue-900">{{ vitals.temperature }}°C</h3>
+              </div>
+              <!-- Blood Pressure -->
+              <div class="bg-gray-50 rounded-xl p-4 text-center">
+                <h6 class="text-gray-500 text-sm mb-2">Blood Pressure</h6>
+                <h3 class="text-2xl font-semibold text-blue-900">{{ vitals.blood_pressure_systolic }}/{{ vitals.blood_pressure_diastolic }} mmHg</h3>
+              </div>
+              <!-- Heart Rate -->
+              <div class="bg-gray-50 rounded-xl p-4 text-center">
+                <h6 class="text-gray-500 text-sm mb-2">Heart Rate</h6>
+                <h3 class="text-2xl font-semibold text-blue-900">{{ vitals.heart_rate }} bpm</h3>
               </div>
             </div>
-            <div class="col-md-4 mb-3">
-              <div class="card">
-                <div class="card-body p-3 text-center">
-                  <h6 class="text-muted mb-1">Blood Pressure</h6>
-                  <h3>{{ vitals.blood_pressure_systolic }}/{{ vitals.blood_pressure_diastolic }} mmHg</h3>
+
+            {% if vitals.notes %}
+              <div class="mt-6">
+                <h5 class="text-base font-semibold text-blue-900 mb-3">Nurse's Notes</h5>
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-xl">
+                  <div class="flex items-start">
+                    <i class="bi bi-info-circle text-blue-600 text-xl mr-3"></i>
+                    <p class="text-gray-700 text-base leading-relaxed mb-0">{{ vitals.notes|linebreaks }}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="col-md-4 mb-3">
-              <div class="card">
-                <div class="card-body p-3 text-center">
-                  <h6 class="text-muted mb-1">Heart Rate</h6>
-                  <h3>{{ vitals.heart_rate }} bpm</h3>
-                </div>
-              </div>
+            {% endif %}
+
+            <div class="mt-6">
+              <p class="mb-0 text-gray-600 text-base">Recorded by: {{ vitals.recorded_by.get_full_name }}</p>
             </div>
           </div>
-          
-          {% if vitals.notes %}
-          <div class="mt-4">
-            <h5>Nurse's Notes</h5>
-            <div class="alert alert-info">
-              {{ vitals.notes|linebreaks }}
-            </div>
-          </div>
-          {% endif %}
-          
-          <div class="mt-4">
-            <p class="mb-0 text-muted">Recorded by: {{ vitals.recorded_by.get_full_name }}</p>
+        </div>
+
+        <!-- Health Tips Card -->
+        <div class="col-span-1">
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+            <h5 class="text-xl font-semibold text-blue-900 mb-4">Health Tips</h5>
+            <p class="text-gray-700 text-base mb-3">Your vital signs are an important indicator of your health status. Regular monitoring helps your healthcare team provide better care.</p>
+            <p class="text-gray-700 text-base mb-0">If you have any concerns about your vital signs, please contact your doctor or healthcare provider.</p>
           </div>
         </div>
       </div>
     </div>
-    
-    <div class="col-lg-4">
-      <div class="card shadow-sm">
-        <div class="card-header bg-white">
-          <h5 class="card-title mb-0">Health Tips</h5>
-        </div>
-        <div class="card-body">
-          <p>Your vital signs are an important indicator of your health status. Regular monitoring helps your healthcare team provide better care.</p>
-          <p>If you have any concerns about your vital signs, please contact your doctor or healthcare provider.</p>
-        </div>
-      </div>
-    </div>
   </div>
-</div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
 {% endblock %}

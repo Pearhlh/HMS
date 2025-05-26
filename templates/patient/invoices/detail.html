@@ -1,123 +1,215 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Invoice #{{ invoice.invoice_number }} | Healthcare System{% endblock %}
+{% block title %}
+  Invoice #{{ invoice.invoice_number }} | Healthcare System
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'patient:dashboard' %}">Dashboard</a></li>
-      <li class="breadcrumb-item active">Invoice #{{ invoice.invoice_number }}</li>
-    </ol>
-  </nav>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8 print:bg-white print:py-0 print:px-0">
+    <div class="container mx-auto print:max-w-full print:mx-0">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6 print:hidden">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'patient:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Invoice #{{ invoice.invoice_number }}
+          </li>
+        </ol>
+      </nav>
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Prescription Invoice</h1>
-    <div>
-      <button class="btn btn-outline-primary" onclick="window.print()">
-        <i class="bi bi-printer me-1"></i> Print
-      </button>
-    </div>
-  </div>
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8 print:mb-4">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900 print:text-xl">
+          Prescription Invoice
+        </h1>
+        <div class="print:hidden">
+          <button class="inline-flex items-center px-4 py-2 border-2 border-blue-600 text-blue-600 text-base font-semibold rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all duration-300" onclick="window.print()">
+            <i class="bi bi-printer mr-2"></i> Print
+          </button>
+        </div>
+      </div>
 
-  <div class="card shadow-sm mb-4">
-    <div class="card-body p-4">
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <h2 class="h5 mb-3">Invoice #{{ invoice.invoice_number }}</h2>
-          <p class="mb-1"><strong>Date Created:</strong> {{ invoice.created_date|date:"F j, Y" }}</p>
-          <p class="mb-1"><strong>Due Date:</strong> {{ invoice.due_date|date:"F j, Y" }}</p>
-          <p class="mb-0"><strong>Status:</strong> 
-            <span class="badge 
-              {% if invoice.status == 'pending' %}bg-warning
-              {% elif invoice.status == 'paid' %}bg-success
-              {% else %}bg-danger{% endif %}">
-              {{ invoice.get_status_display }}
-            </span>
-          </p>
+      <!-- Invoice Details Card -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp print:shadow-none print:rounded-none print:border-none print:p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 print:gap-4">
+          <!-- Invoice Details -->
+          <div>
+            <h2 class="text-xl font-semibold text-blue-900 mb-3 print:text-lg">Invoice #{{ invoice.invoice_number }}</h2>
+            <p class="mb-2"><span class="font-medium text-blue-900">Date Created:</span> {{ invoice.created_date|date:"F j, Y" }}</p>
+            <p class="mb-2"><span class="font-medium text-blue-900">Due Date:</span> {{ invoice.due_date|date:"F j, Y" }}</p>
+            <p class="mb-0">
+              <span class="font-medium text-blue-900">Status:</span>
+              <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full {% if invoice.status == 'pending' %}bg-yellow-200 text-yellow-800{% elif invoice.status == 'paid' %}bg-green-200 text-green-800{% else %}bg-red-200 text-red-800{% endif %}">
+                {{ invoice.get_status_display }}
+              </span>
+            </p>
+          </div>
+          <!-- Pharmacy Information -->
+          <div class="text-right print:text-left">
+            <h4 class="text-lg font-semibold text-blue-900 mb-3 print:text-base">Healthcare Pharmacy</h4>
+            <p class="mb-2">123 Medical Center Avenue</p>
+            <p class="mb-2">City, State ZIP</p>
+            <p class="mb-0">Phone: (123) 456-7890</p>
+          </div>
         </div>
-        <div class="col-md-6 text-md-end">
-          <h4 class="h5 mb-3">Healthcare Pharmacy</h4>
-          <p class="mb-1">123 Medical Center Avenue</p>
-          <p class="mb-1">City, State ZIP</p>
-          <p class="mb-0">Phone: (123) 456-7890</p>
+
+        <hr class="border-gray-200 my-6 print:border-gray-300 print:my-4">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 print:gap-4">
+          <!-- Billed To -->
+          <div>
+            <h5 class="text-base font-semibold text-blue-900 mb-2 print:text-sm">Billed To:</h5>
+            <p class="mb-2"><strong class="text-gray-900">{{ invoice.patient.user.get_full_name }}</strong></p>
+            <p class="mb-0 text-gray-700">{{ invoice.patient.user.email }}</p>
+          </div>
+          <!-- Prescription Details -->
+          <div>
+            <h5 class="text-base font-semibold text-blue-900 mb-2 print:text-sm">Prescription Details:</h5>
+            <p class="mb-2"><span class="font-medium text-blue-900">Doctor:</span> Dr. {{ invoice.prescription_dispensing.prescription.doctor.user.get_full_name }}</p>
+            <p class="mb-0"><span class="font-medium text-blue-900">Prescribed:</span> {{ invoice.prescription_dispensing.prescription.date_prescribed|date:"F j, Y" }}</p>
+          </div>
         </div>
-      </div>
-      
-      <hr>
-      
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <h5 class="h6 mb-2">Billed To:</h5>
-          <p class="mb-1"><strong>{{ invoice.patient.user.get_full_name }}</strong></p>
-          <p class="mb-1">{{ invoice.patient.user.email }}</p>
+
+        <!-- Medication Costs Table -->
+        <div class="overflow-x-auto mb-6">
+          <table class="w-full border-collapse">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900 print:text-xs print:px-4 print:py-2">Medication</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900 print:text-xs print:px-4 print:py-2">Dosage</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900 print:text-xs print:px-4 print:py-2">Quantity</th>
+                <th class="px-6 py-4 text-right text-sm font-semibold text-blue-900 print:text-xs print:px-4 print:py-2">Unit Price</th>
+                <th class="px-6 py-4 text-right text-sm font-semibold text-blue-900 print:text-xs print:px-4 print:py-2">Total</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for cost_item in medication_costs %}
+                <tr class="hover:bg-gray-50 transition-all duration-200 print:hover:bg-transparent">
+                  <td class="px-6 py-4 text-gray-700 text-base print:text-sm print:px-4 print:py-2">{{ cost_item.medication.medication_name }}</td>
+                  <td class="px-6 py-4 text-gray-700 text-base print:text-sm print:px-4 print:py-2">{{ cost_item.medication.dosage }}</td>
+                  <td class="px-6 py-4 text-gray-700 text-base print:text-sm print:px-4 print:py-2">{{ cost_item.medication.quantity }}</td>
+                  <td class="px-6 py-4 text-right text-gray-700 text-base print:text-sm print:px-4 print:py-2">${{ cost_item.price_per_unit|floatformat:2 }}</td>
+                  <td class="px-6 py-4 text-right text-gray-700 text-base print:text-sm print:px-4 print:py-2">${{ cost_item.item_total|floatformat:2 }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5" class="px-6 py-4 text-center text-gray-700 text-base print:text-sm print:px-4 print:py-2">No medications listed</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="px-6 py-4 text-right font-semibold text-blue-900 print:text-sm print:px-4 print:py-2">Total</td>
+                <td class="px-6 py-4 text-right font-semibold text-blue-900 print:text-sm print:px-4 print:py-2">${{ invoice.total_amount|floatformat:2 }}</td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
-        <div class="col-md-6">
-          <h5 class="h6 mb-2">Prescription Details:</h5>
-          <p class="mb-1"><strong>Doctor:</strong> Dr. {{ invoice.prescription_dispensing.prescription.doctor.user.get_full_name }}</p>
-          <p class="mb-1"><strong>Prescribed:</strong> {{ invoice.prescription_dispensing.prescription.date_prescribed|date:"F j, Y" }}</p>
-        </div>
-      </div>
-      
-      <div class="table-responsive mb-4">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Medication</th>
-              <th>Dosage</th>
-              <th>Quantity</th>
-              <th class="text-end">Unit Price</th>
-              <th class="text-end">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for cost_item in medication_costs %}
-            <tr>
-              <td>{{ cost_item.medication.medication_name }}</td>
-              <td>{{ cost_item.medication.dosage }}</td>
-              <td>{{ cost_item.medication.quantity }}</td>
-              <td class="text-end">${{ cost_item.price_per_unit|floatformat:2 }}</td>
-              <td class="text-end">${{ cost_item.item_total|floatformat:2 }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="5" class="text-center">No medications listed</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="4" class="text-end"><strong>Total</strong></td>
-              <td class="text-end"><strong>${{ invoice.total_amount|floatformat:2 }}</strong></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-      
-      {% if invoice.notes %}
-      <div class="mb-4">
-        <h5 class="h6 mb-2">Notes:</h5>
-        <div class="p-3 bg-light rounded">
-          {{ invoice.notes|linebreaksbr }}
-        </div>
-      </div>
-      {% endif %}
-      
-      <div class="mt-4">
-        <p class="mb-1 text-center">Please pay by the due date: {{ invoice.due_date|date:"F j, Y" }}</p>
-        
-        {% if invoice.status == 'pending' %}
-        <div class="text-center mt-4">
-          <form method="post" action="{% url 'patient:bills' %}">
-            {% csrf_token %}
-            <input type="hidden" name="invoice_id" value="{{ invoice.id }}">
-            <button type="submit" class="btn btn-primary">Pay Now</button>
-          </form>
-        </div>
+
+        {% if invoice.notes %}
+          <div class="mb-6">
+            <h5 class="text-base font-semibold text-blue-900 mb-2 print:text-sm">Notes:</h5>
+            <div class="p-4 bg-gray-50 rounded-xl text-gray-700 text-base leading-relaxed print:bg-transparent print:p-2 print:text-sm">
+              {{ invoice.notes|linebreaksbr }}
+            </div>
+          </div>
         {% endif %}
+
+        <div class="mt-6 text-center print:text-sm">
+          <p class="mb-2 text-gray-700">Please pay by the due date: {{ invoice.due_date|date:"F j, Y" }}</p>
+
+          {% if invoice.status == 'pending' %}
+            <form method="post" action="{% url 'patient:bills' %}" class="print:hidden">
+              {% csrf_token %}
+              <input type="hidden" name="invoice_id" value="{{ invoice.id }}">
+              <button type="submit" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow">
+                Pay Now
+              </button>
+            </form>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+    /* Print-specific styles */
+    @media print {
+      .print\:hidden {
+        display: none;
+      }
+      .print\:bg-white {
+        background: white !important;
+      }
+      .print\:py-0 {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+      }
+      .print\:px-0 {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+      .print\:max-w-full {
+        max-width: 100% !important;
+      }
+      .print\:mx-0 {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      .print\:shadow-none {
+        box-shadow: none !important;
+      }
+      .print\:rounded-none {
+        border-radius: 0 !important;
+      }
+      .print\:border-none {
+        border: none !important;
+      }
+    }
+  </style>
 {% endblock %}

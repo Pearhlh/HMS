@@ -1,102 +1,155 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Lab Test Results | Healthcare System{% endblock %}
+{% block title %}
+  Lab Test Results | Healthcare System
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Lab Test Results</h1>
-    <a href="{% url 'patient:dashboard' %}" class="btn btn-outline-secondary">
-      <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
-    </a>
-  </div>
-
-  {% if messages %}
-    <div class="messages mb-4">
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-      <h5 class="card-title mb-0">{{ lab_test.test_name|default:lab_test.get_test_type_display }}</h5>
-      <span class="badge {% if lab_test.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
-        {{ lab_test.get_status_display }}
-      </span>
-    </div>
-    <div class="card-body">
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <p><strong>Test Date:</strong> {{ lab_test.test_date|date:"F j, Y"|default:lab_test.requested_date|date:"F j, Y"|default:"Not specified" }}</p>
-          <p><strong>Results Date:</strong> {{ lab_test.completed_date|date:"F j, Y"|default:"Not yet available" }}</p>
-          <p><strong>Ordered By:</strong> {% if lab_test.requested_by %}Dr. {{ lab_test.requested_by.user.get_full_name }}{% else %}{% if lab_test.ordered_by %}Dr. {{ lab_test.ordered_by.get_full_name }}{% else %}Not specified{% endif %}{% endif %}</p>
-        </div>
-        <div class="col-md-6">
-          <p><strong>Sample Type:</strong> {{ lab_test.sample_type|default:"Not specified" }}</p>
-          <p><strong>Priority:</strong> {{ lab_test.priority|title|default:"Normal" }}</p>
-        </div>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Lab Test Results
+        </h1>
+        <a href="{% url 'patient:dashboard' %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+          <i class="bi bi-arrow-left mr-2"></i>Back to Dashboard
+        </a>
       </div>
 
-      {% if lab_test.results %}
-        <h6 class="mb-3">Results</h6>
-        <div class="card mb-4">
-          <div class="card-body">
-            <pre class="mb-0">{{ lab_test.results }}</pre>
-          </div>
-        </div>
-      {% endif %}
-      
-      {% if result_items %}
-        <h6 class="mb-3">Detailed Results</h6>
-        <div class="table-responsive mb-4">
-          <table class="table table-bordered">
-            <thead class="table-light">
-              <tr>
-                <th>Test Parameter</th>
-                <th>Result</th>
-                <th>Reference Range</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in result_items %}
-                <tr>
-                  <td>{{ item.parameter_name }}</td>
-                  <td>{{ item.value }} {% if item.unit %}{{ item.unit }}{% endif %}</td>
-                  <td>{{ item.reference_range|default:"--" }}</td>
-                  <td>
-                    {% if item.is_abnormal %}
-                      <span class="badge bg-danger">Abnormal</span>
-                    {% else %}
-                      <span class="badge bg-success">Normal</span>
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
         </div>
       {% endif %}
 
-      {% if lab_test.interpretation %}
-        <h6 class="mb-3">Interpretation</h6>
-        <div class="alert alert-info">
-          {{ lab_test.interpretation|linebreaks }}
+      <!-- Lab Test Details Card -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-8 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <div class="flex justify-between items-center mb-6">
+          <h5 class="text-xl font-semibold text-blue-900 mb-0">{{ lab_test.test_name|default:lab_test.get_test_type_display }}</h5>
+          <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full {% if lab_test.status == 'completed' %}bg-green-200 text-green-800{% else %}bg-yellow-200 text-yellow-800{% endif %}">
+            {{ lab_test.get_status_display }}
+          </span>
         </div>
-      {% endif %}
-      
-      {% if lab_test.notes %}
-        <h6 class="mb-3">Additional Notes</h6>
-        <div class="card">
-          <div class="card-body">
-            {{ lab_test.notes|linebreaks }}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <p class="mb-2"><span class="font-medium text-blue-900">Test Date:</span> {{ lab_test.test_date|date:"F j, Y"|default:lab_test.requested_date|date:"F j, Y"|default:"Not specified" }}</p>
+            <p class="mb-2"><span class="font-medium text-blue-900">Results Date:</span> {{ lab_test.completed_date|date:"F j, Y"|default:"Not yet available" }}</p>
+            <p class="mb-0"><span class="font-medium text-blue-900">Ordered By:</span> {% if lab_test.requested_by %}Dr. {{ lab_test.requested_by.user.get_full_name }}{% else %}{% if lab_test.ordered_by %}Dr. {{ lab_test.ordered_by.get_full_name }}{% else %}Not specified{% endif %}{% endif %}</p>
+          </div>
+          <div>
+            <p class="mb-2"><span class="font-medium text-blue-900">Sample Type:</span> {{ lab_test.sample_type|default:"Not specified" }}</p>
+            <p class="mb-0"><span class="font-medium text-blue-900">Priority:</span> {{ lab_test.priority|title|default:"Normal" }}</p>
           </div>
         </div>
-      {% endif %}
+
+        {% if lab_test.results %}
+          <h6 class="text-base font-semibold text-blue-900 mb-3">Results</h6>
+          <div class="card bg-gray-50 rounded-xl p-4 mb-6">
+            <pre class="mb-0 text-gray-700 text-base leading-relaxed">{{ lab_test.results }}</pre>
+          </div>
+        {% endif %}
+
+        {% if result_items %}
+          <h6 class="text-base font-semibold text-blue-900 mb-3">Detailed Results</h6>
+          <div class="overflow-x-auto mb-6">
+            <table class="w-full border-collapse">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Test Parameter</th>
+                  <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Result</th>
+                  <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Reference Range</th>
+                  <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                {% for item in result_items %}
+                  <tr class="hover:bg-gray-50 transition-all duration-200">
+                    <td class="px-6 py-4 text-gray-700 text-base">{{ item.parameter_name }}</td>
+                    <td class="px-6 py-4 text-gray-700 text-base">{{ item.value }} {% if item.unit %}{{ item.unit }}{% endif %}</td>
+                    <td class="px-6 py-4 text-gray-700 text-base">{{ item.reference_range|default:"--" }}</td>
+                    <td class="px-6 py-4">
+                      {% if item.is_abnormal %}
+                        <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full bg-red-200 text-red-800">Abnormal</span>
+                      {% else %}
+                        <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full bg-green-200 text-green-800">Normal</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+
+        {% if lab_test.interpretation %}
+          <h6 class="text-base font-semibold text-blue-900 mb-3">Interpretation</h6>
+          <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-xl mb-6">
+            <div class="flex items-start">
+              <i class="bi bi-info-circle text-blue-600 text-xl mr-3"></i>
+              <p class="text-gray-700 text-base leading-relaxed mb-0">{{ lab_test.interpretation|linebreaks }}</p>
+            </div>
+          </div>
+        {% endif %}
+
+        {% if lab_test.notes %}
+          <h6 class="text-base font-semibold text-blue-900 mb-3">Additional Notes</h6>
+          <div class="card bg-gray-50 rounded-xl p-4">
+            <p class="text-gray-700 text-base leading-relaxed mb-0">{{ lab_test.notes|linebreaks }}</p>
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
-</div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
 {% endblock %}
