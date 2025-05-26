@@ -1,123 +1,193 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Payment Methods | Healthcare System{% endblock %}
+{% block title %}
+  Payment Methods | Healthcare System
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'patient:dashboard' %}">Dashboard</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'patient:bills' %}">Billing & Payments</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Payment Methods</li>
-    </ol>
-  </nav>
-  
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Payment Methods</h1>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
-      <i class="bi bi-plus"></i> Add New
-    </button>
-  </div>
-  
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-white">
-      <h5 class="mb-0">Credit/Debit Cards</h5>
-    </div>
-    <div class="card-body p-0">
-      {% if payment_methods %}
-        <div class="list-group list-group-flush">
-          {% for method in payment_methods %}
-            {% if method.type == 'credit_card' %}
-              <div class="list-group-item p-3">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center">
-                    <i class="bi bi-credit-card fs-4 me-3"></i>
-                    <div>
-                      <h6 class="mb-0">{{ method.get_card_brand_display }} •••• {{ method.card_last_four }}</h6>
-                      <p class="text-muted mb-0 small">Expires: {{ method.expiry_month }}/{{ method.expiry_year }}</p>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'patient:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'patient:bills' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Billing & Payments</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Payment Methods
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Payment Methods
+        </h1>
+        <button type="button" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
+          <i class="bi bi-plus mr-2"></i> Add New
+        </button>
+      </div>
+
+      <!-- Credit/Debit Cards -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-8 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <div class="flex justify-between items-center mb-6">
+          <h5 class="text-xl font-semibold text-blue-900 mb-0">Credit/Debit Cards</h5>
+        </div>
+        <div class="p-0">
+          {% if payment_methods %}
+            <div class="divide-y divide-gray-100">
+              {% for method in payment_methods %}
+                {% if method.type == 'credit_card' %}
+                  <div class="py-4">
+                    <div class="flex justify-between items-center">
+                      <div class="flex items-center">
+                        <i class="bi bi-credit-card text-2xl text-blue-600 mr-4"></i>
+                        <div>
+                          <h6 class="text-base font-semibold text-blue-900 mb-1">{{ method.get_card_brand_display }} •••• {{ method.card_last_four }}</h6>
+                          <p class="text-gray-600 text-sm mb-0">Expires: {{ method.expiry_month }}/{{ method.expiry_year }}</p>
+                        </div>
+                      </div>
+                      <div class="flex gap-2">
+                        {% if method.is_default %}
+                          <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full bg-blue-500 text-white">
+                            Default
+                          </span>
+                        {% else %}
+                          <button type="button" class="inline-flex items-center px-3 py-2 border-2 border-gray-500 text-gray-500 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+                            Set Default
+                          </button>
+                        {% endif %}
+                        <button type="button" class="inline-flex items-center px-3 py-2 border-2 border-red-500 text-red-500 text-sm font-semibold rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-300">
+                          <i class="bi bi-trash mr-1"></i> Remove
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <div class="btn-group btn-group-sm">
-                    {% if method.is_default %}
-                      <span class="badge bg-primary me-2">Default</span>
-                    {% else %}
-                      <button type="button" class="btn btn-outline-secondary btn-sm me-2">Set Default</button>
-                    {% endif %}
-                    <button type="button" class="btn btn-outline-danger btn-sm">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            {% endif %}
-          {% endfor %}
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-10">
+              <i class="bi bi-credit-card text-gray-400 text-5xl"></i>
+              <p class="mt-4 text-gray-700 text-base mb-6">No payment cards added yet</p>
+              <button type="button" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
+                Add Card
+              </button>
+            </div>
+          {% endif %}
         </div>
-      {% else %}
-        <div class="text-center py-4">
-          <i class="bi bi-credit-card text-muted" style="font-size: 3rem;"></i>
-          <p class="mt-3 mb-0">No payment cards added yet</p>
-          <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
-            Add Card
+      </div>
+
+      <!-- Payment Security Info -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-8 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <div class="flex items-start">
+          <i class="bi bi-shield-lock text-green-600 text-2xl mr-4"></i>
+          <div>
+            <h5 class="text-xl font-semibold text-blue-900 mb-2">Payment Security</h5>
+            <p class="text-gray-700 text-base mb-0">All your payment information is encrypted and securely stored using industry-standard security protocols.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Payment Method Modal -->
+  <div class="modal fade" id="addPaymentMethodModal" tabindex="-1" aria-labelledby="addPaymentMethodModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content rounded-3xl">
+        <div class="modal-header border-b border-gray-100 p-4 sm:p-6">
+          <h5 class="text-xl font-semibold text-blue-900 mb-0" id="addPaymentMethodModalLabel">Add Payment Method</h5>
+          <button type="button" class="text-gray-600 hover:text-gray-800 focus:outline-none" data-bs-dismiss="modal" aria-label="Close">
+            <i class="bi bi-x-lg text-lg"></i>
           </button>
         </div>
-      {% endif %}
-    </div>
-  </div>
-  
-  <!-- Payment Security Info -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-body">
-      <div class="d-flex align-items-start">
-        <i class="bi bi-shield-lock text-success me-3 fs-3"></i>
-        <div>
-          <h5>Payment Security</h5>
-          <p class="mb-0">All your payment information is encrypted and securely stored using industry-standard security protocols.</p>
+        <div class="modal-body p-4 sm:p-6">
+          <form id="card-form" class="space-y-4">
+            <div>
+              <label for="card-name" class="block text-base font-semibold text-blue-900 mb-2">Cardholder Name</label>
+              <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="card-name" required>
+            </div>
+            <div>
+              <label for="card-number" class="block text-base font-semibold text-blue-900 mb-2">Card Number</label>
+              <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="card-number" required>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="card-expiry" class="block text-base font-semibold text-blue-900 mb-2">Expiration Date</label>
+                <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="card-expiry" placeholder="MM/YY" required>
+              </div>
+              <div>
+                <label for="card-cvv" class="block text-base font-semibold text-blue-900 mb-2">CVV</label>
+                <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="card-cvv" required>
+              </div>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" class="form-check-input h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-200" id="card-default">
+              <label class="ml-2 text-gray-700 text-sm" for="card-default">Set as default payment method</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-t border-gray-100 p-4 sm:p-6">
+          <button type="button" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button type="button" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow">
+            Save
+          </button>
         </div>
       </div>
     </div>
   </div>
-</div>
+{% endblock %}
 
-<!-- Add Payment Method Modal -->
-<div class="modal fade" id="addPaymentMethodModal" tabindex="-1" aria-labelledby="addPaymentMethodModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addPaymentMethodModalLabel">Add Payment Method</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="card-form">
-          <div class="mb-3">
-            <label for="card-name" class="form-label">Cardholder Name</label>
-            <input type="text" class="form-control" id="card-name" required>
-          </div>
-          <div class="mb-3">
-            <label for="card-number" class="form-label">Card Number</label>
-            <input type="text" class="form-control" id="card-number" required>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="card-expiry" class="form-label">Expiration Date</label>
-              <input type="text" class="form-control" id="card-expiry" placeholder="MM/YY" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="card-cvv" class="form-label">CVV</label>
-              <input type="text" class="form-control" id="card-cvv" required>
-            </div>
-          </div>
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="card-default">
-            <label class="form-check-label" for="card-default">Set as default payment method</label>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
+<style>
+  /* Forcefully remove underlines from all <a> tags */
+  a {
+    text-decoration: none !important;
+  }
+  /* Custom animations */
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes pulseGlow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+    }
+  }
+  .animate-slideInUp {
+    animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+  }
+  .animate-pulseGlow {
+    animation: pulseGlow 2s infinite ease-in-out;
+  }
+  /* Reduced motion override */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-slideInUp, .animate-pulseGlow {
+      animation: none;
+    }
+  }
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    a {
+      color: #1e40af;
+    }
+  }
+</style>
 {% endblock %}

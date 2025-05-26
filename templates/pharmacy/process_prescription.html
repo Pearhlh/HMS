@@ -2,220 +2,321 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}Process Prescription | Pharmacy System{% endblock %}
+{% block title %}
+  Process Prescription | Pharmacy System
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'pharmacy:dashboard' %}">Dashboard</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'pharmacy:prescription_list' %}">Prescriptions</a></li>
-      <li class="breadcrumb-item active">Process Prescription</li>
-    </ol>
-  </nav>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'pharmacy:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'pharmacy:prescription_list' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Prescriptions</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Process Prescription
+          </li>
+        </ol>
+      </nav>
 
-  {% if messages %}
-    <div class="messages mb-4">
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <div class="row">
-    <div class="col-md-8">
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white">
-          <h5 class="card-title mb-0">Process Prescription</h5>
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
         </div>
-        <div class="card-body">
-          {% if table_missing %}
-            <div class="alert alert-warning">
-              <h5 class="alert-heading">Database Tables Missing</h5>
-              <p>The pharmacy system database tables have not been created yet.</p>
-              <hr>
-              <p class="mb-0">An administrator needs to run the following commands:</p>
-              <pre class="mt-2 bg-light p-3">
+      {% endif %}
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="col-span-2">
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+            <div class="flex justify-between items-center mb-6">
+              <h5 class="text-xl font-semibold text-blue-900 mb-0">Process Prescription</h5>
+            </div>
+            <div class="p-0">
+              {% if table_missing %}
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-xl">
+                  <h5 class="text-lg font-semibold text-yellow-800 mb-2">Database Tables Missing</h5>
+                  <p class="text-gray-700 text-base mb-2">The pharmacy system database tables have not been created yet.</p>
+                  <hr class="border-gray-200 my-2">
+                  <p class="text-gray-700 text-base mb-2">An administrator needs to run the following commands:</p>
+                  <pre class="mt-2 bg-gray-100 p-3 rounded-lg text-gray-800 text-sm">
 python manage.py makemigrations pharmacy
 python manage.py migrate pharmacy</pre>
-            </div>
-          {% else %}
-            <form method="post" id="dispensing_form">
-              {% csrf_token %}
-              
-              <div class="mb-4">
-                <h6>Prescription Details</h6>
-                <div class="card bg-light">
-                  <div class="card-body">
-                    <div class="row mb-3">
-                      <div class="col-md-6">
-                        <p class="mb-1"><strong>Patient:</strong> {{ prescription.patient.user.get_full_name }}</p>
-                        <p class="mb-1"><strong>Doctor:</strong> Dr. {{ prescription.doctor.user.get_full_name }}</p>
-                        <p class="mb-0"><strong>Date:</strong> {{ prescription.date_prescribed|date:"F j, Y" }}</p>
+                </div>
+              {% else %}
+                <form method="post" id="dispensing_form" class="space-y-6">
+                  {% csrf_token %}
+                  
+                  <!-- Prescription Details -->
+                  <div>
+                    <h6 class="text-base font-semibold text-blue-900 mb-3">Prescription Details</h6>
+                    <div class="card bg-gray-50 rounded-xl p-4">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-3">
+                        <div>
+                          <p class="mb-2"><span class="font-medium text-blue-900">Patient:</span> {{ prescription.patient.user.get_full_name }}</p>
+                          <p class="mb-2"><span class="font-medium text-blue-900">Doctor:</span> Dr. {{ prescription.doctor.user.get_full_name }}</p>
+                          <p class="mb-0"><span class="font-medium text-blue-900">Date:</span> {{ prescription.date_prescribed|date:"F j, Y" }}</p>
+                        </div>
+                        <div>
+                          <p class="mb-0"><span class="font-medium text-blue-900">Status:</span> {{ prescription.get_status_display }}</p>
+                        </div>
                       </div>
-                      <div class="col-md-6">
-                        <p class="mb-1"><strong>Status:</strong> {{ prescription.get_status_display }}</p>
+                      <div class="mb-0">
+                        <span class="font-medium text-blue-900">Instructions:</span>
+                        <div class="mt-2 text-gray-700 text-base leading-relaxed">{{ prescription.notes|linebreaksbr }}</div>
                       </div>
-                    </div>
-                    
-                    <div class="mb-0">
-                      <strong>Instructions:</strong>
-                      <div class="mt-2">{{ prescription.notes|linebreaksbr }}</div>
                     </div>
                   </div>
-                </div>
-              </div>
-              
-              <div class="mb-4">
-                <h6>Dispensing Information</h6>
-                {{ form|crispy }}
-              </div>
-              
-              {% if medication_formset %}
-              <div class="mb-4">
-                <h6>Medication Items</h6>
-                {{ medication_formset.management_form }}
-                <div class="card">
-                  <div class="card-body">
-                    <div id="medication-items">
-                      {% for medication_form in medication_formset %}
-                        <div class="medication-item mb-3 p-3 border rounded">
-                          <div class="row">
-                            <div class="col-md-6">{{ medication_form.medication_name|as_crispy_field }}</div>
-                            <div class="col-md-6">{{ medication_form.dosage|as_crispy_field }}</div>
-                          </div>
-                          <div class="row">
-                            <div class="col-md-4">{{ medication_form.quantity|as_crispy_field }}</div>
-                            <div class="col-md-8">{{ medication_form.notes|as_crispy_field }}</div>
-                          </div>
-                          {% if medication_formset.can_delete %}
-                            <div class="form-check">
-                              {{ medication_form.DELETE|as_crispy_field }}
+                  
+                  <!-- Dispensing Information -->
+                  <div>
+                    <h6 class="text-base font-semibold text-blue-900 mb-3">Dispensing Information</h6>
+                    {{ form|crispy }}
+                  </div>
+                  
+                  <!-- Medication Items -->
+                  {% if medication_formset %}
+                    <div>
+                      <h6 class="text-base font-semibold text-blue-900 mb-3">Medication Items</h6>
+                      {{ medication_formset.management_form }}
+                      <div class="card bg-gray-50 rounded-xl p-4">
+                        <div id="medication-items" class="space-y-4">
+                          {% for medication_form in medication_formset %}
+                            <div class="medication-item p-4 bg-white rounded-lg border border-gray-200">
+                              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>{{ medication_form.medication_name|as_crispy_field }}</div>
+                                <div>{{ medication_form.dosage|as_crispy_field }}</div>
+                              </div>
+                              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                                <div class="md:col-span-1">{{ medication_form.quantity|as_crispy_field }}</div>
+                                <div class="md:col-span-2">{{ medication_form.notes|as_crispy_field }}</div>
+                              </div>
+                              {% if medication_formset.can_delete %}
+                                <div class="mt-3">
+                                  {{ medication_form.DELETE|as_crispy_field }}
+                                </div>
+                              {% endif %}
                             </div>
-                          {% endif %}
+                          {% endfor %}
                         </div>
-                      {% endfor %}
+                        <button type="button" class="mt-4 inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:text-gray-600 transition-all duration-300" id="add-medication">
+                          <i class="bi bi-plus-circle mr-2"></i> Add Medication
+                        </button>
+                      </div>
                     </div>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="add-medication">
-                      <i class="bi bi-plus-circle me-1"></i> Add Medication
+                  {% endif %}
+                  
+                  <!-- Submit Buttons -->
+                  <div class="flex justify-end gap-4">
+                    <a href="{% url 'pharmacy:prescription_list' %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+                      Cancel
+                    </a>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow">
+                      Save
                     </button>
                   </div>
-                </div>
-              </div>
+                </form>
               {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-span-1">
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+            <h5 class="text-xl font-semibold text-blue-900 mb-6">Actions</h5>
+            <div class="space-y-2">
+              <button class="w-full py-3 px-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-200 flex justify-between items-center" form="dispensing_form" type="submit" name="status" value="verified">
+                <div class="text-left">
+                  <strong class="text-gray-900 text-base">Verify Prescription</strong>
+                  <div class="text-gray-600 text-sm">Mark as verified but not yet dispensed</div>
+                </div>
+                <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full bg-blue-200 text-blue-800">→</span>
+              </button>
+              <button class="w-full py-3 px-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all duration-200 flex justify-between items-center" form="dispensing_form" type="submit" name="status" value="dispensed">
+                <div class="text-left">
+                  <strong class="text-gray-900 text-base">Mark as Dispensed</strong>
+                  <div class="text-gray-600 text-sm">Medication has been given to patient</div>
+                </div>
+                <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full bg-green-200 text-green-800">✓</span>
+              </button>
+              <button class="w-full py-3 px-4 bg-red-50 rounded-xl hover:bg-red-100 transition-all duration-200 flex justify-between items-center" form="dispensing_form" type="submit" name="status" value="rejected">
+                <div class="text-left">
+                  <strong class="text-gray-900 text-base">Reject Prescription</strong>
+                  <div class="text-gray-600 text-sm">Unable to fulfill this prescription</div>
+                </div>
+                <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full bg-red-200 text-red-800">✕</span>
+              </button>
               
-              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-outline-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary">Save</button>
-              </div>
-            </form>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-    
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <div class="card-header bg-white">
-          <h5 class="card-title mb-0">Actions</h5>
-        </div>
-        <div class="card-body">
-          <div class="list-group">
-            <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" form="dispensing_form" type="submit" name="status" value="verified">
-              <div>
-                <strong>Verify Prescription</strong>
-                <div class="small text-muted">Mark as verified but not yet dispensed</div>
-              </div>
-              <span class="badge bg-info rounded-pill">→</span>
-            </button>
-            <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" form="dispensing_form" type="submit" name="status" value="dispensed">
-              <div>
-                <strong>Mark as Dispensed</strong>
-                <div class="small text-muted">Medication has been given to patient</div>
-              </div>
-              <span class="badge bg-success rounded-pill">✓</span>
-            </button>
-            <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" form="dispensing_form" type="submit" name="status" value="rejected">
-              <div>
-                <strong>Reject Prescription</strong>
-                <div class="small text-muted">Unable to fulfill this prescription</div>
-              </div>
-              <span class="badge bg-danger rounded-pill">✕</span>
-            </button>
-            
-            {% if dispensing and dispensing.id %}
-              <a href="{% url 'pharmacy:create_invoice' dispensing.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                <div>
-                  <strong>Create Invoice</strong>
-                  <div class="small text-muted">Generate a billing invoice for this prescription</div>
+              {% if dispensing and dispensing.id %}
+                <a href="{% url 'pharmacy:create_invoice' dispensing.id %}" class="w-full py-3 px-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-200 flex justify-between items-center">
+                  <div class="text-left">
+                    <strong class="text-gray-900 text-base">Create Invoice</strong>
+                    <div class="text-gray-600 text-sm">Generate a billing invoice for this prescription</div>
+                  </div>
+                  <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full bg-blue-500 text-white">$</span>
+                </a>
+                <a href="{% url 'pharmacy:manage_delivery' dispensing.id %}" class="w-full py-3 px-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-200 flex justify-between items-center">
+                  <div class="text-left">
+                    <strong class="text-gray-900 text-base">Manage Delivery</strong>
+                    <div class="text-gray-600 text-sm">Set up or update medication delivery</div>
+                  </div>
+                  <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full bg-blue-500 text-white"><i class="bi bi-truck"></i></span>
+                </a>
+              {% else %}
+                <div class="w-full py-3 px-4 bg-gray-100 rounded-xl flex justify-between items-center opacity-50 cursor-not-allowed">
+                  <div class="text-left">
+                    <strong class="text-gray-900 text-base">Create Invoice</strong>
+                    <div class="text-gray-600 text-sm">First process the prescription to create an invoice</div>
+                  </div>
                 </div>
-                <span class="badge bg-primary rounded-pill">$</span>
-              </a>
-              <a href="{% url 'pharmacy:manage_delivery' dispensing.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                <div>
-                  <strong>Manage Delivery</strong>
-                  <div class="small text-muted">Set up or update medication delivery</div>
+                <div class="w-full py-3 px-4 bg-gray-100 rounded-xl flex justify-between items-center opacity-50 cursor-not-allowed">
+                  <div class="text-left">
+                    <strong class="text-gray-900 text-base">Manage Delivery</strong>
+                    <div class="text-gray-600 text-sm">First process the prescription to manage delivery</div>
+                  </div>
                 </div>
-                <span class="badge bg-primary rounded-pill"><i class="bi bi-truck"></i></span>
-              </a>
-            {% else %}
-              <div class="list-group-item list-group-item-action disabled">
-                <div>
-                  <strong>Create Invoice</strong>
-                  <div class="small text-muted">First process the prescription to create an invoice</div>
-                </div>
-              </div>
-              <div class="list-group-item list-group-item-action disabled">
-                <div>
-                  <strong>Manage Delivery</strong>
-                  <div class="small text-muted">First process the prescription to manage delivery</div>
-                </div>
-              </div>
-            {% endif %}
+              {% endif %}
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-{% if medication_formset %}
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const addButton = document.getElementById('add-medication');
-    const totalFormsInput = document.getElementById('id_medications-TOTAL_FORMS');
-    const medicationsContainer = document.getElementById('medication-items');
-    
-    if (addButton) {
-      addButton.addEventListener('click', function() {
-        const formCount = parseInt(totalFormsInput.value);
-        const template = medicationsContainer.querySelector('.medication-item').cloneNode(true);
+  {% if medication_formset %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const addButton = document.getElementById('add-medication');
+        const totalFormsInput = document.getElementById('id_medications-TOTAL_FORMS');
+        const medicationsContainer = document.getElementById('medication-items');
         
-        // Update form index
-        template.innerHTML = template.innerHTML.replace(/-\d+-/g, `-${formCount}-`);
-        
-        // Clear values
-        const inputs = template.querySelectorAll('input[type="text"], input[type="number"], textarea');
-        inputs.forEach(input => {
-          input.value = '';
-          input.name = input.name.replace(/-\d+-/, `-${formCount}-`);
-          input.id = input.id.replace(/-\d+-/, `-${formCount}-`);
-        });
-        
-        // Update labels
-        const labels = template.querySelectorAll('label');
-        labels.forEach(label => {
-          if (label.htmlFor) {
-            label.htmlFor = label.htmlFor.replace(/-\d+-/, `-${formCount}-`);
-          }
-        });
-        
-        // Add the new form
-        medicationsContainer.appendChild(template);
-        totalFormsInput.value = formCount + 1;
+        if (addButton) {
+          addButton.addEventListener('click', function() {
+            const formCount = parseInt(totalFormsInput.value);
+            const template = medicationsContainer.querySelector('.medication-item').cloneNode(true);
+            
+            // Update form index
+            template.innerHTML = template.innerHTML.replace(/-\d+-/g, `-${formCount}-`);
+            
+            // Clear values
+            const inputs = template.querySelectorAll('input[type="text"], input[type="number"], textarea');
+            inputs.forEach(input => {
+              input.value = '';
+              input.name = input.name.replace(/-\d+-/, `-${formCount}-`);
+              input.id = input.id.replace(/-\d+-/, `-${formCount}-`);
+            });
+            
+            // Update labels
+            const labels = template.querySelectorAll('label');
+            labels.forEach(label => {
+              if (label.htmlFor) {
+                label.htmlFor = label.htmlFor.replace(/-\d+-/, `-${formCount}-`);
+              }
+            });
+            
+            // Add the new form
+            medicationsContainer.appendChild(template);
+            totalFormsInput.value = formCount + 1;
+          });
+        }
       });
+    </script>
+  {% endif %}
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
     }
-  });
-</script>
-{% endif %}
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+    /* Custom styling for crispy forms inputs */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin-bottom: 0.5rem;
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      font-size: 1.125rem;
+      color: #1e3a8a;
+      background-color: #f9fafb;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .helptext {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+      display: block;
+    }
+    .errorlist {
+      color: #dc2626;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      list-style: none;
+      padding: 0;
+    }
+  </style>
 {% endblock %}

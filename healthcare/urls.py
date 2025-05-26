@@ -44,7 +44,6 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
     
     path('admin/', admin.site.urls),
-    
     # Authentication
     path('accounts/', include('allauth.urls')),
     

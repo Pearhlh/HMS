@@ -2,55 +2,162 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}Create Invoice | Pharmacy System{% endblock %}
+{% block title %}
+  Create Invoice | Pharmacy System
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'pharmacy:dashboard' %}">Dashboard</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'pharmacy:prescription_list' %}">Prescriptions</a></li>
-      <li class="breadcrumb-item active">Create Invoice</li>
-    </ol>
-  </nav>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'pharmacy:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'pharmacy:prescription_list' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Prescriptions</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Create Invoice
+          </li>
+        </ol>
+      </nav>
 
-  {% if messages %}
-    <div class="messages mb-4">
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
 
-  <div class="card shadow-sm">
-    <div class="card-header bg-white">
-      <h5 class="card-title mb-0">Create Prescription Invoice</h5>
-    </div>
-    <div class="card-body">
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <h6 class="mb-3">Patient Information</h6>
-          <p class="mb-1"><strong>Patient:</strong> {{ dispensing.patient.user.get_full_name }}</p>
-          <p class="mb-1"><strong>Email:</strong> {{ dispensing.patient.user.email }}</p>
+      <!-- Invoice Creation Card -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <div class="flex justify-between items-center mb-6">
+          <h5 class="text-xl font-semibold text-blue-900 mb-0">Create Prescription Invoice</h5>
         </div>
-        <div class="col-md-6">
-          <h6 class="mb-3">Prescription Information</h6>
-          <p class="mb-1"><strong>Prescription ID:</strong> {{ dispensing.prescription.id }}</p>
-          <p class="mb-1"><strong>Doctor:</strong> Dr. {{ dispensing.prescription.doctor.user.get_full_name }}</p>
-          <p class="mb-1"><strong>Date Prescribed:</strong> {{ dispensing.prescription.date_prescribed|date:"F j, Y" }}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <!-- Patient Information -->
+          <div>
+            <h6 class="text-base font-semibold text-blue-900 mb-3">Patient Information</h6>
+            <p class="mb-2"><span class="font-medium text-blue-900">Patient:</span> {{ dispensing.patient.user.get_full_name }}</p>
+            <p class="mb-0"><span class="font-medium text-blue-900">Email:</span> {{ dispensing.patient.user.email }}</p>
+          </div>
+          <!-- Prescription Information -->
+          <div>
+            <h6 class="text-base font-semibold text-blue-900 mb-3">Prescription Information</h6>
+            <p class="mb-2"><span class="font-medium text-blue-900">Prescription ID:</span> {{ dispensing.prescription.id }}</p>
+            <p class="mb-2"><span class="font-medium text-blue-900">Doctor:</span> Dr. {{ dispensing.prescription.doctor.user.get_full_name }}</p>
+            <p class="mb-0"><span class="font-medium text-blue-900">Date Prescribed:</span> {{ dispensing.prescription.date_prescribed|date:"F j, Y" }}</p>
+          </div>
         </div>
+
+        <!-- Invoice Form -->
+        <form method="post" class="space-y-6">
+          {% csrf_token %}
+          {{ form|crispy }}
+          
+          <!-- Submit Buttons -->
+          <div class="flex justify-end gap-4">
+            <a href="{% url 'pharmacy:prescription_list' %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+              Cancel
+            </a>
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow">
+              Create Invoice
+            </button>
+          </div>
+        </form>
       </div>
-      
-      <form method="post">
-        {% csrf_token %}
-        {{ form|crispy }}
-        
-        <div class="mt-4 d-flex justify-content-end">
-          <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-outline-secondary me-2">Cancel</a>
-          <button type="submit" class="btn btn-primary">Create Invoice</button>
-        </div>
-      </form>
     </div>
   </div>
-</div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+    /* Custom styling for crispy forms inputs */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin-bottom: 0.5rem;
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      font-size: 1.125rem;
+      color: #1e3a8a;
+      background-color: #f9fafb;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .helptext {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+      display: block;
+    }
+    .errorlist {
+      color: #dc2626;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      list-style: none;
+      padding: 0;
+    }
+  </style>
 {% endblock %}
