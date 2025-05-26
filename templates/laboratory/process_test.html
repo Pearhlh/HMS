@@ -1,214 +1,279 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
-{% load widget_tweaks %}
 
-{% block title %}Process Lab Test{% endblock %}
+{% block title %}
+  Test Details | Laboratory System
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="mb-4">
-        <a href="{% url 'lab_dashboard' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
-        </a>
-    </div>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'laboratory:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'laboratory:test_list' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Test Requests</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Test Details
+          </li>
+        </ol>
+      </nav>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4 class="mb-0">Process Lab Test #{{ lab_test.id }}</h4>
-        </div>
-        <div class="card-body">
-            <!-- Test Details -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <h5 class="card-title">Test Details</h5>
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr>
-                                <th width="35%">Test Name</th>
-                                <td>{{ lab_test.test_name }}</td>
-                            </tr>
-                            <tr>
-                                <th>Patient</th>
-                                <td>{{ lab_test.patient.user.get_full_name }}</td>
-                            </tr>
-                            <tr>
-                                <th>MRN</th>
-                                <td>{{ lab_test.patient.medical_record_number }}</td>
-                            </tr>
-                            <tr>
-                                <th>Ordered By</th>
-                                <td>Dr. {{ lab_test.doctor.user.get_full_name }}</td>
-                            </tr>
-                            <tr>
-                                <th>Test Date</th>
-                                <td>{{ lab_test.test_date|date:"F d, Y H:i" }}</td>
-                            </tr>
-                            <tr>
-                                <th>Current Status</th>
-                                <td>
-                                    {% if lab_test.status == 'ordered' %}
-                                        <span class="badge bg-warning">{{ lab_test.get_status_display }}</span>
-                                    {% elif lab_test.status == 'collected' %}
-                                        <span class="badge bg-info">{{ lab_test.get_status_display }}</span>
-                                    {% elif lab_test.status == 'in_process' %}
-                                        <span class="badge bg-primary">{{ lab_test.get_status_display }}</span>
-                                    {% elif lab_test.status == 'completed' %}
-                                        <span class="badge bg-success">{{ lab_test.get_status_display }}</span>
-                                    {% elif lab_test.status == 'canceled' %}
-                                        <span class="badge bg-danger">{{ lab_test.get_status_display }}</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Notes</th>
-                                <td>{{ lab_test.notes|default:"No notes provided" }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="col-md-6">
-                    <!-- Update Status Form -->
-                    <h5 class="card-title">Update Status</h5>
-                    <form method="post" class="mb-4">
-                        {% csrf_token %}
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <div class="form-group mb-3">
-                                    <label for="status" class="form-label">Change Status</label>
-                                    <select name="status" id="status" class="form-select">
-                                        <option value="ordered" {% if lab_test.status == 'ordered' %}selected{% endif %}>Ordered</option>
-                                        <option value="collected" {% if lab_test.status == 'collected' %}selected{% endif %}>Sample Collected</option>
-                                        <option value="in_process" {% if lab_test.status == 'in_process' %}selected{% endif %}>In Process</option>
-                                        <option value="completed" {% if lab_test.status == 'completed' %}selected{% endif %}>Completed</option>
-                                        <option value="canceled" {% if lab_test.status == 'canceled' %}selected{% endif %}>Canceled</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-check-circle me-2"></i>Update Status
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    <!-- Upload Report Form -->
-                    <h5 class="card-title">Upload Test Report</h5>
-                    <form method="post" enctype="multipart/form-data" class="mb-4">
-                        {% csrf_token %}
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <div class="form-group mb-3">
-                                    <label for="report_file" class="form-label">Report File</label>
-                                    <input type="file" name="report_file" id="report_file" class="form-control">
-                                    <div class="form-text">Upload PDF, DOC or JPG files (max 10MB)</div>
-                                </div>
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-upload me-2"></i>Upload Report
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
             </div>
-            
-            <!-- Test Results Section -->
-            <h5 class="card-title">Test Results</h5>
-            <form method="post" class="mb-4">
-                {% csrf_token %}
-                <div class="card bg-light mb-3">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label for="{{ result_form.result_value.id_for_label }}" class="form-label">Result Value</label>
-                                    {% render_field result_form.result_value class="form-control" %}
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label for="{{ result_form.reference_range.id_for_label }}" class="form-label">Reference Range</label>
-                                    {% render_field result_form.reference_range class="form-control" %}
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label for="{{ result_form.is_abnormal.id_for_label }}" class="form-label">Is Abnormal</label>
-                                    <div class="form-check mt-2">
-                                        {% render_field result_form.is_abnormal class="form-check-input" %}
-                                        <label class="form-check-label" for="{{ result_form.is_abnormal.id_for_label }}">
-                                            Abnormal Result
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="{{ result_form.notes.id_for_label }}" class="form-label">Notes</label>
-                            {% render_field result_form.notes class="form-control" rows="3" %}
-                        </div>
-                        <button type="submit" name="add_result" class="btn btn-primary">
-                            <i class="bi bi-plus-circle me-2"></i>Add Result
-                        </button>
-                    </div>
-                </div>
-            </form>
-            
-            <!-- Existing Results -->
-            <h5 class="card-title">Recorded Results</h5>
-            {% if lab_test.test_results.all %}
-                <div class="table-responsive mb-4">
-                    <table class="table table-striped table-bordered">
-                        <thead class="table-primary">
-                            <tr>
-                                <th>Result Value</th>
-                                <th>Reference Range</th>
-                                <th>Status</th>
-                                <th>Notes</th>
-                                <th>Added By</th>
-                                <th>Added At</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for result in lab_test.test_results.all %}
-                                <tr>
-                                    <td>{{ result.result_value }}</td>
-                                    <td>{{ result.reference_range }}</td>
-                                    <td>
-                                        {% if result.is_abnormal %}
-                                            <span class="badge bg-danger">Abnormal</span>
-                                        {% else %}
-                                            <span class="badge bg-success">Normal</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ result.notes|default:"-" }}</td>
-                                    <td>{{ result.uploaded_by.get_full_name }}</td>
-                                    <td>{{ result.uploaded_at|date:"M d, Y H:i" }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="alert alert-info">No results have been recorded yet.</div>
-            {% endif %}
-            
-            <!-- Complete Test Section -->
-            {% if lab_test.test_results.all and lab_test.status != 'completed' %}
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Complete Test</h5>
-                        <p>All required results have been added. You can now mark this test as completed.</p>
-                        <form method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="status" value="completed">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-check2-circle me-2"></i>Mark Test as Completed
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            {% endif %}
+          {% endfor %}
         </div>
+      {% endif %}
+
+      {% if test %}
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <!-- Main Content -->
+          <div class="md:col-span-8">
+            <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+              <div class="flex justify-between items-center mb-6">
+                <h5 class="text-xl font-semibold text-blue-900 mb-0">{{ test.get_test_type_display }} Details</h5>
+                <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full {% if test.status == 'requested' %}bg-yellow-200 text-yellow-800{% elif test.status == 'scheduled' %}bg-blue-200 text-blue-800{% elif test.status == 'in_progress' %}bg-blue-500 text-white{% elif test.status == 'completed' %}bg-green-200 text-green-800{% elif test.status == 'canceled' %}bg-red-200 text-red-800{% else %}bg-gray-200 text-gray-800{% endif %}">
+                  {{ test.get_status_display }}
+                </span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <div class="mb-4">
+                    <label class="block text-gray-600 text-sm mb-1">Patient</label>
+                    <p class="text-gray-900 text-base">{{ test.patient.user.get_full_name }}</p>
+                  </div>
+                  <div class="mb-4">
+                    <label class="block text-gray-600 text-sm mb-1">Test Type</label>
+                    <p class="text-gray-900 text-base">{{ test.get_test_type_display }}</p>
+                  </div>
+                </div>
+                <div>
+                  <div class="mb-4">
+                    <label class="block text-gray-600 text-sm mb-1">Requested By</label>
+                    <p class="text-gray-900 text-base">
+                      {% if test.requested_by %}
+                        Dr. {{ test.requested_by.user.get_full_name }}
+                      {% else %}
+                        Not specified
+                      {% endif %}
+                    </p>
+                  </div>
+                  <div class="mb-4">
+                    <label class="block text-gray-600 text-sm mb-1">Date Requested</label>
+                    <p class="text-gray-900 text-base">{{ test.created_at|date:"F j, Y" }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-6">
+                <label class="block text-gray-600 text-sm mb-1">Description</label>
+                <div class="p-4 bg-gray-50 rounded-xl text-gray-700 text-base leading-relaxed">
+                  {{ test.description }}
+                </div>
+              </div>
+
+              {% if test.instructions %}
+                <div class="mb-6">
+                  <label class="block text-gray-600 text-sm mb-1">Special Instructions</label>
+                  <div class="p-4 bg-gray-50 rounded-xl text-gray-700 text-base leading-relaxed">
+                    {{ test.instructions }}
+                  </div>
+                </div>
+              {% endif %}
+
+              <form method="post" class="space-y-6">
+                {% csrf_token %}
+                <div>
+                  <label for="id_test_name" class="block text-base font-semibold text-blue-900 mb-2">Test Name</label>
+                  <input type="text" name="test_name" id="id_test_name" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" value="{{ test.test_name|default:'' }}">
+                </div>
+                <div>
+                  <label for="id_sample_type" class="block text-base font-semibold text-blue-900 mb-2">Sample Type</label>
+                  <input type="text" name="sample_type" id="id_sample_type" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" value="{{ test.sample_type|default:'' }}">
+                </div>
+                <div>
+                  <label for="id_priority" class="block text-base font-semibold text-blue-900 mb-2">Priority</label>
+                  <select name="priority" id="id_priority" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300">
+                    <option value="urgent" {% if test.priority == 'urgent' %}selected{% endif %}>Urgent</option>
+                    <option value="normal" {% if test.priority == 'normal' or not test.priority %}selected{% endif %}>Normal</option>
+                    <option value="low" {% if test.priority == 'low' %}selected{% endif %}>Low</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="id_results" class="block text-base font-semibold text-blue-900 mb-2">Test Results</label>
+                  <textarea name="results" id="id_results" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" rows="5">{{ test.results|default:'' }}</textarea>
+                  <small class="text-gray-600 text-sm mt-1 block">Enter comprehensive test results here. These will be visible to the patient.</small>
+                </div>
+                <div>
+                  <label for="id_status" class="block text-base font-semibold text-blue-900 mb-2">Status</label>
+                  <select name="status" id="id_status" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300">
+                    {% for value, display in test.TEST_STATUS_CHOICES %}
+                      <option value="{{ value }}" {% if value == test.status %}selected{% endif %}>{{ display }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div>
+                  <label for="id_notes" class="block text-base font-semibold text-blue-900 mb-2">Notes</label>
+                  <textarea name="notes" id="id_notes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300">{{ test.notes }}</textarea>
+                </div>
+                <div class="flex justify-end gap-4">
+                  <a href="{% url 'laboratory:test_list' %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+                    Cancel
+                  </a>
+                  <button type="submit" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow">
+                    Save Results
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="md:col-span-4">
+            <!-- Patient Information -->
+            <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+              <h5 class="text-xl font-semibold text-blue-900 mb-6">Patient Information</h5>
+              <div class="text-center mb-4">
+                <div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2 text-xl font-semibold">
+                  {{ test.patient.user.first_name|slice:":1" }}{{ test.patient.user.last_name|slice:":1" }}
+                </div>
+                <h5 class="text-lg font-semibold text-gray-900 mb-1">{{ test.patient.user.get_full_name }}</h5>
+                <p class="text-gray-600 text-sm mb-0">Patient #{{ test.patient.id }}</p>
+              </div>
+
+              <hr class="border-gray-200 my-4">
+
+              <div class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                  <div class="col-span-2 text-gray-600 text-sm">Date of Birth:</div>
+                  <div class="col-span-3 text-gray-900 text-base">{{ test.patient.date_of_birth|default:"Not specified" }}</div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                  <div class="col-span-2 text-gray-600 text-sm">Gender:</div>
+                  <div class="col-span-3 text-gray-900 text-base">{{ test.patient.get_gender_display|default:"Not specified" }}</div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                  <div class="col-span-2 text-gray-600 text-sm">Email:</div>
+                  <div class="col-span-3 text-gray-900 text-base">{{ test.patient.user.email }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Test Status Timeline -->
+            <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+              <h5 class="text-xl font-semibold text-blue-900 mb-6">Test Status Timeline</h5>
+              <ul class="space-y-4">
+                <li class="border-l-2 border-green-500 pl-4">
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-900 text-base">Requested</span>
+                    <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-green-200 text-green-800">✓</span>
+                  </div>
+                  <small class="text-gray-600 text-sm">{{ test.created_at|date:"M d, Y" }}</small>
+                </li>
+                <li class="border-l-2 {% if test.status == 'in_progress' or test.status == 'completed' %}border-green-500{% else %}border-gray-300{% endif %} pl-4">
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-900 text-base">In Progress</span>
+                    <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full {% if test.status == 'in_progress' or test.status == 'completed' %}bg-green-200 text-green-800{% else %}bg-gray-200 text-gray-800{% endif %}">
+                      {% if test.status == 'in_progress' or test.status == 'completed' %}✓{% else %}⋯{% endif %}
+                    </span>
+                  </div>
+                </li>
+                <li class="border-l-2 {% if test.status == 'completed' %}border-green-500{% else %}border-gray-300{% endif %} pl-4">
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-900 text-base">Completed</span>
+                    <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full {% if test.status == 'completed' %}bg-green-200 text-green-800{% else %}bg-gray-200 text-gray-800{% endif %}">
+                      {% if test.status == 'completed' %}✓{% else %}⋯{% endif %}
+                    </span>
+                  </div>
+                  {% if test.completed_date %}
+                    <small class="text-gray-600 text-sm">{{ test.completed_date|date:"M d, Y" }}</small>
+                  {% endif %}
+                </li>
+              </ul>
+            </div>
+
+            <!-- Notification Actions -->
+            {% if test.status == 'completed' %}
+              <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+                <h5 class="text-xl font-semibold text-blue-900 mb-6">Notification Actions</h5>
+                <form method="post" action="{% url 'laboratory:finalize_lab_result' test.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="w-full px-4 py-3 bg-yellow-500 text-white text-base font-semibold rounded-xl shadow-md hover:bg-yellow-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-yellow-200 transition-all duration-300">
+                    <i class="bi bi-bell mr-2"></i>Resend Test Result Notification
+                  </button>
+                  <small class="text-gray-600 text-sm mt-2 block">Use this button if the patient hasn't received a notification.</small>
+                </form>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% else %}
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-xl">
+          <div class="flex items-start">
+            <i class="bi bi-exclamation-triangle text-yellow-600 text-xl mr-3"></i>
+            <div>
+              <h4 class="text-lg font-semibold text-yellow-800 mb-1">Lab System Setup in Progress</h4>
+              <p class="text-gray-700 text-base mb-0">The laboratory system is still being set up. Please check back later.</p>
+            </div>
+          </div>
+        </div>
+      {% endif %}
     </div>
-</div>
+  </div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
 {% endblock %}
