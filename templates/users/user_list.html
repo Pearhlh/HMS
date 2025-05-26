@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}User Management - User List{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>User List</h1>
+        <a href="{% url 'create_user' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus-fill me-2"></i>Create New User
+        </a>
+    </div>
+    
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    {{ filter_form.role.label_tag }}
+                    {{ filter_form.role }}
+                </div>
+                <div class="col-md-4">
+                    {{ filter_form.status.label_tag }}
+                    {{ filter_form.status }}
+                </div>
+                <div class="col-md-4">
+                    {{ filter_form.search.label_tag }}
+                    {{ filter_form.search }}
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-filter me-2"></i>Apply Filters
+                    </button>
+                    <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- User List -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_obj in users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if user_obj.profile_picture %}
+                                            <img src="{{ user_obj.profile_picture.url }}" class="rounded-circle me-2" width="40" height="40">
+                                        {% else %}
+                                            <div class="rounded-circle bg-secondary-subtle text-center me-2" style="width: 40px; height: 40px; line-height: 40px;">
+                                                <i class="bi bi-person"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="fw-medium">{{ user_obj.get_full_name|default:"Anonymous" }}</div>
+                                            {% if user_obj.get_full_name %}
+                                                <div class="small text-muted">@{{ user_obj.email|slice:"0:"|add:user_obj.email|cut:"@" }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ user_obj.email }}</td>
+                                <td>
+                                    {% if user_obj.role == 'admin' %}
+                                        <span class="badge bg-danger">{{ user_obj.get_role_display }}</span>
+                                    {% elif user_obj.role == 'doctor' %}
+                                        <span class="badge bg-success">{{ user_obj.get_role_display }}</span>
+                                    {% elif user_obj.role == 'nurse' %}
+                                        <span class="badge bg-info">{{ user_obj.get_role_display }}</span>
+                                    {% elif user_obj.role == 'patient' %}
+                                        <span class="badge bg-primary">{{ user_obj.get_role_display }}</span>
+                                    {% elif user_obj.role == 'pharmacist' %}
+                                        <span class="badge bg-warning">{{ user_obj.get_role_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ user_obj.get_role_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user_obj.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user_obj.date_joined|date:"M d, Y" }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'user_detail' user_obj.id %}" class="btn btn-outline-primary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'update_user' user_obj.id %}" class="btn btn-outline-secondary" title="Edit User">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'set_user_password' user_obj.id %}" class="btn btn-outline-warning" title="Set Password">
+                                            <i class="bi bi-key"></i>
+                                        </a>
+                                        <a href="{% url 'toggle_user_status' user_obj.id %}" class="btn btn-outline-danger" title="Toggle Status">
+                                            {% if user_obj.is_active %}
+                                                <i class="bi bi-lock"></i>
+                                            {% else %}
+                                                <i class="bi bi-unlock"></i>
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="bi bi-people fs-1 text-muted mb-3"></i>
+                                    <p class="mb-0 text-muted">No users found matching your criteria</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

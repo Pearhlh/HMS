@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  Your Notifications | Healthcare System
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'patient:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Notifications
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Your Notifications
+        </h1>
+        <div class="flex gap-3">
+          <button id="refresh-btn" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+            <i class="bi bi-arrow-clockwise mr-2"></i> Refresh
+          </button>
+          <a href="?mark_all_read=1" class="inline-flex items-center px-4 py-2 border-2 border-blue-600 text-blue-600 text-base font-semibold rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all duration-300">
+            <i class="bi bi-check-all mr-2"></i> Mark All as Read
+          </a>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Notifications List -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-0 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        {% if notifications %}
+          <div class="divide-y divide-gray-100">
+            {% for notification in notifications %}
+              <a href="{% url 'patient:notification_detail' notification.id %}" class="block p-4 hover:bg-gray-50 transition-all duration-200 {% if not notification.read %}bg-blue-50{% endif %}">
+                <div class="flex justify-between items-start">
+                  <h6 class="text-base font-semibold text-blue-900 mb-1">{{ notification.subject }}</h6>
+                  <span class="text-gray-500 text-sm whitespace-nowrap">{{ notification.created_at|timesince }} ago</span>
+                </div>
+                <p class="text-gray-700 text-base mb-1 truncate">{{ notification.message }}</p>
+                <span class="text-gray-600 text-sm">{{ notification.notification_type|title }}</span>
+              </a>
+            {% empty %}
+              <div class="text-center py-10">
+                <i class="bi bi-bell text-gray-400 text-5xl"></i>
+                <p class="mt-4 text-gray-700 text-base mb-0">You have no notifications</p>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-10">
+            <i class="bi bi-bell text-gray-400 text-5xl"></i>
+            <p class="mt-4 text-gray-700 text-base mb-0">You have no notifications</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+      window.location.reload();
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Access Denied | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-danger text-white">
+          <h5 class="mb-0">Access Denied</h5>
+        </div>
+        <div class="card-body">
+          <div class="text-center mb-4">
+            <i class="bi bi-shield-lock" style="font-size: 4rem; color: #dc3545;"></i>
+          </div>
+          <h4 class="text-center mb-4">You don't have permission to access this page</h4>
+          
+          <p>You are logged in as <strong>{{ user.email }}</strong> with the role <strong>{{ user.role|default:"Unknown" }}</strong>, 
+          but this page requires the <strong>{{ required_role }}</strong> role.</p>
+          
+          <p class="mb-4">Please contact an administrator if you believe you should have access to this page.</p>
+          
+          <div class="d-grid gap-2">
+            {% if user.role == 'doctor' %}
+              <a href="{% url 'doctor:dashboard' %}" class="btn btn-primary">Go to Doctor Dashboard</a>
+            {% elif user.role == 'patient' %}
+              <a href="{% url 'patient:dashboard' %}" class="btn btn-primary">Go to Patient Dashboard</a>
+            {% elif user.role == 'pharmacist' or user.role == 'pharmacy' %}
+              <a href="{% url 'pharmacy:dashboard' %}" class="btn btn-primary">Go to Pharmacy Dashboard</a>
+            {% elif user.role == 'admin' %}
+              <a href="{% url 'admin:index' %}" class="btn btn-primary">Go to Admin Dashboard</a>
+            {% else %}
+              <a href="/" class="btn btn-primary">Go to Homepage</a>
+            {% endif %}
+            <a href="{% url 'logout' %}" class="btn btn-outline-secondary">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

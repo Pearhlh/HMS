@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Insurance Policy {{ policy.policy_number }} | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'insurance:dashboard' %}">Insurance Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'insurance:policy_list' %}">Policies</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Policy {{ policy.policy_number }}</li>
+    </ol>
+  </nav>
+
+  {% if messages %}
+    <div class="messages mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="mb-4">
+    <div class="alert alert-light border">
+      <p class="mb-1"><strong>Debug Info:</strong></p>
+      <p class="mb-0">Current Policy Status: <code>{{ policy.status }}</code> ({{ policy.get_status_display }})</p>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Policy Details: {{ policy.policy_number }}</h1>
+    <div>
+      {% if policy.status == 'pending' and request.user.role == 'insurance' %}
+        <button type="button" class="btn btn-success me-2" onclick="$('#approveModal').modal('show');">
+          <i class="bi bi-check-circle me-2"></i>Approve Policy
+        </button>
+        <button type="button" class="btn btn-danger" onclick="$('#rejectModal').modal('show');">
+          <i class="bi bi-x-circle me-2"></i>Reject Policy
+        </button>
+      {% endif %}
+      <a href="{% url 'insurance:policy_list' %}" class="btn btn-outline-secondary ms-2">
+        <i class="bi bi-arrow-left me-2"></i>Back to Policies
+      </a>
+    </div>
+  </div>
+
+  <!-- Add a workflow status indicator -->
+  {% if policy.status == 'pending' %}
+  <div class="alert alert-info mb-4">
+    <div class="d-flex align-items-center">
+      <div class="me-3">
+        <i class="bi bi-info-circle fs-4"></i>
+      </div>
+      <div>
+        <h5 class="alert-heading mb-1">Verification Pending</h5>
+        <p class="mb-0">This policy requires verification. As an insurance representative, you can approve or reject this policy.</p>
+      </div>
+    </div>
+  </div>
+  {% elif policy.status == 'active' %}
+  <div class="alert alert-success mb-4">
+    <div class="d-flex align-items-center">
+      <div class="me-3">
+        <i class="bi bi-check-circle fs-4"></i>
+      </div>
+      <div>
+        <h5 class="alert-heading mb-1">Policy Active</h5>
+        <p class="mb-0">This policy has been verified and is currently active.</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row">
+    <!-- Policy Information -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Policy Information</h5>
+          <span class="badge {% if policy.status == 'active' %}bg-success{% elif policy.status == 'pending' %}bg-warning{% elif policy.status == 'expired' %}bg-danger{% else %}bg-secondary{% endif %}">
+            {{ policy.get_status_display }}
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Policy Number:</div>
+            <div class="col-sm-8">{{ policy.policy_number }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Provider:</div>
+            <div class="col-sm-8">{{ policy.provider.name }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Member ID:</div>
+            <div class="col-sm-8">{{ policy.member_id }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Group Number:</div>
+            <div class="col-sm-8">{{ policy.group_number|default:"Not provided" }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Valid Period:</div>
+            <div class="col-sm-8">{{ policy.start_date|date:"M d, Y" }} to {{ policy.end_date|date:"M d, Y" }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Created:</div>
+            <div class="col-sm-8">{{ policy.created_at|date:"M d, Y" }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Last Updated:</div>
+            <div class="col-sm-8">{{ policy.updated_at|date:"M d, Y" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient & Coverage Information -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Patient & Coverage Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Patient:</div>
+            <div class="col-sm-8">{{ policy.patient.user.get_full_name }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Email:</div>
+            <div class="col-sm-8">{{ policy.patient.user.email }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Coverage %:</div>
+            <div class="col-sm-8">{{ policy.coverage_percentage }}%</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Deductible:</div>
+            <div class="col-sm-8">${{ policy.deductible }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Co-Pay:</div>
+            <div class="col-sm-8">${{ policy.co_pay }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Out-of-Pocket Max:</div>
+            <div class="col-sm-8">${{ policy.out_of_pocket_max }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Coverage Details:</div>
+            <div class="col-sm-8">{{ policy.coverage_details|linebreaks }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insurance Claims -->
+  <div class="card shadow-sm mb-4">
+   
+    <div class="card-body p-0">
+      {% if claims %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Claim #</th>
+                <th>Service Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for claim in claims %}
+                <tr>
+                  <td>{{ claim.claim_number }}</td>
+                  <td>{{ claim.service_date|date:"M d, Y" }}</td>
+                  <td>${{ claim.claim_amount }}</td>
+                  <td>
+                    <span class="badge {% if claim.approval_status == 'approved' %}bg-success{% elif claim.approval_status == 'pending' %}bg-warning{% elif claim.approval_status == 'rejected' %}bg-danger{% elif claim.approval_status == 'partial' %}bg-info{% else %}bg-secondary{% endif %}">
+                      {{ claim.get_approval_status_display }}
+                    </span>
+                  </td>
+                  <td>
+                    <a href="{% url 'insurance:claim_detail' claim.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                    {% if claim.approval_status == 'pending' and request.user.role == 'insurance' %}
+                      <a href="{% url 'insurance:process_claim' claim.id %}" class="btn btn-sm btn-outline-success">Process</a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Important: Make sure the form action is empty or points to the current URL -->
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="approve">
+        <div class="modal-header">
+          <h5 class="modal-title">Approve Policy</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to approve this insurance policy?</p>
+          <ul class="list-unstyled">
+            <li><strong>Patient:</strong> {{ policy.patient.user.get_full_name }}</li>
+            <li><strong>Policy Number:</strong> {{ policy.policy_number }}</li>
+            <li><strong>Member ID:</strong> {{ policy.member_id }}</li>
+          </ul>
+          <div class="mb-3">
+            <label for="notes-approve" class="form-label">Notes (optional)</label>
+            <textarea class="form-control" id="notes-approve" name="notes" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Approve Policy</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reject">
+        <div class="modal-header">
+          <h5 class="modal-title">Reject Policy</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to reject this insurance policy?</p>
+          <ul class="list-unstyled">
+            <li><strong>Patient:</strong> {{ policy.patient.user.get_full_name }}</li>
+            <li><strong>Policy Number:</strong> {{ policy.policy_number }}</li>
+            <li><strong>Member ID:</strong> {{ policy.member_id }}</li>
+          </ul>
+          <div class="mb-3">
+            <label for="notes-reject" class="form-label">Reason for rejection (required)</label>
+            <textarea class="form-control" id="notes-reject" name="notes" rows="3" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Reject Policy</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

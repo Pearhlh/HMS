@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Payment Methods | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'patient:dashboard' %}">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'patient:bills' %}">Billing & Payments</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Payment Methods</li>
+    </ol>
+  </nav>
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Payment Methods</h1>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
+      <i class="bi bi-plus"></i> Add New
+    </button>
+  </div>
+  
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+      <h5 class="mb-0">Credit/Debit Cards</h5>
+    </div>
+    <div class="card-body p-0">
+      {% if payment_methods %}
+        <div class="list-group list-group-flush">
+          {% for method in payment_methods %}
+            {% if method.type == 'credit_card' %}
+              <div class="list-group-item p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-credit-card fs-4 me-3"></i>
+                    <div>
+                      <h6 class="mb-0">{{ method.get_card_brand_display }} •••• {{ method.card_last_four }}</h6>
+                      <p class="text-muted mb-0 small">Expires: {{ method.expiry_month }}/{{ method.expiry_year }}</p>
+                    </div>
+                  </div>
+                  <div class="btn-group btn-group-sm">
+                    {% if method.is_default %}
+                      <span class="badge bg-primary me-2">Default</span>
+                    {% else %}
+                      <button type="button" class="btn btn-outline-secondary btn-sm me-2">Set Default</button>
+                    {% endif %}
+                    <button type="button" class="btn btn-outline-danger btn-sm">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-4">
+          <i class="bi bi-credit-card text-muted" style="font-size: 3rem;"></i>
+          <p class="mt-3 mb-0">No payment cards added yet</p>
+          <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
+            Add Card
+          </button>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <!-- Payment Security Info -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="d-flex align-items-start">
+        <i class="bi bi-shield-lock text-success me-3 fs-3"></i>
+        <div>
+          <h5>Payment Security</h5>
+          <p class="mb-0">All your payment information is encrypted and securely stored using industry-standard security protocols.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Payment Method Modal -->
+<div class="modal fade" id="addPaymentMethodModal" tabindex="-1" aria-labelledby="addPaymentMethodModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addPaymentMethodModalLabel">Add Payment Method</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="card-form">
+          <div class="mb-3">
+            <label for="card-name" class="form-label">Cardholder Name</label>
+            <input type="text" class="form-control" id="card-name" required>
+          </div>
+          <div class="mb-3">
+            <label for="card-number" class="form-label">Card Number</label>
+            <input type="text" class="form-control" id="card-number" required>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="card-expiry" class="form-label">Expiration Date</label>
+              <input type="text" class="form-control" id="card-expiry" placeholder="MM/YY" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="card-cvv" class="form-label">CVV</label>
+              <input type="text" class="form-control" id="card-cvv" required>
+            </div>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="card-default">
+            <label class="form-check-label" for="card-default">Set as default payment method</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

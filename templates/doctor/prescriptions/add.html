@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  Create Prescription | Healthcare System
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'doctor:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'doctor:patients' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Patients</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'doctor:patient_detail' patient.id %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">{{ patient.user.get_full_name }}</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Create Prescription
+          </li>
+        </ol>
+      </nav>
+
+      <div class="flex justify-center">
+        <div class="w-full max-w-2xl">
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+            <h5 class="text-xl font-semibold text-blue-900 mb-6">Create Prescription for {{ patient.user.get_full_name }}</h5>
+
+            <form method="post" class="space-y-6">
+              {% csrf_token %}
+              
+              <div>
+                <label for="medication" class="block text-base font-semibold text-blue-900 mb-2">Medication</label>
+                <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="medication" name="medication" required>
+              </div>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label for="dosage" class="block text-base font-semibold text-blue-900 mb-2">Dosage</label>
+                  <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="dosage" name="dosage" placeholder="e.g. 10mg" required>
+                </div>
+                <div>
+                  <label for="frequency" class="block text-base font-semibold text-blue-900 mb-2">Frequency</label>
+                  <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="frequency" name="frequency" placeholder="e.g. twice daily" required>
+                </div>
+                <div>
+                  <label for="duration" class="block text-base font-semibold text-blue-900 mb-2">Duration</label>
+                  <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="duration" name="duration" placeholder="e.g. 7 days" required>
+                </div>
+              </div>
+              
+              <div>
+                <label for="notes" class="block text-base font-semibold text-blue-900 mb-2">Additional Instructions/Notes</label>
+                <textarea class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" id="notes" name="notes" rows="3"></textarea>
+                <small class="block mt-1 text-gray-600 text-sm">Include any special instructions for the patient or pharmacist.</small>
+              </div>
+              
+              <div class="flex justify-end gap-4">
+                <a href="{% url 'doctor:patient_detail' patient.id %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+                  Cancel
+                </a>
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-500 text-white text-base font-semibold rounded-xl shadow-md hover:bg-green-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-green-200 transition-all duration-300">
+                  Create Prescription
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
+{% endblock %}

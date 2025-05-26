@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+  Edit Profile | Healthcare System
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Edit Profile
+        </h1>
+        <a href="{% url 'patient:profile' %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+          <i class="bi bi-arrow-left mr-2"></i> Back to Profile
+        </a>
+      </div>
+      
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" class="space-y-8">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Personal Information -->
+          <div class="mb-6">
+            <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+              <h5 class="text-xl font-semibold text-blue-900 mb-6">Personal Information</h5>
+              <div class="space-y-6">
+                {{ user_form.first_name|as_crispy_field }}
+                {{ user_form.last_name|as_crispy_field }}
+                {{ user_form.email|as_crispy_field }}
+                {{ patient_form.date_of_birth|as_crispy_field }}
+                {{ patient_form.gender|as_crispy_field }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Medical Information -->
+          <div class="mb-6">
+            <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+              <h5 class="text-xl font-semibold text-blue-900 mb-6">Medical Information</h5>
+              <div class="space-y-6">
+                {{ patient_form.blood_type|as_crispy_field }}
+                {{ patient_form.allergies|as_crispy_field }}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-4">
+          <a href="{% url 'patient:profile' %}" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+            Cancel
+          </a>
+          <button type="submit" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+    /* Custom styling for crispy forms inputs */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin-bottom: 0.5rem;
+    }
+    .form-control, select.form-control:not([multiple]) {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      font-size: 1.125rem;
+      color: #1e3a8a;
+      background-color: #f9fafb;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-control:focus, select.form-control:focus:not([multiple]) {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .form-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-check-input {
+      width: 1.25rem;
+      height: 1.25rem;
+      margin: 0;
+    }
+    .form-check-label {
+      font-size: 1rem;
+      color: #1e3a8a;
+    }
+    .asteriskField {
+      color: #dc2626;
+      margin-left: 0.25rem;
+    }
+    .helptext {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+      display: block;
+    }
+    .errorlist {
+      color: #dc2626;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      list-style: none;
+      padding: 0;
+    }
+  </style>
+{% endblock %}

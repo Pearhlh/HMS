@@ -1,0 +1,12 @@
+{
+  "symptoms": [
+    "Fever", "Cough", "Sneezing", "Fatigue", "Sore Throat", "Headache", "Runny Nose",
+    "Loss of Taste", "Shortness of Breath", "Itchy Eyes", "Rash", "High Fever",
+    "Severe Headache", "Joint Pain", "Bleeding", "Swollen Tonsils", "Difficulty Swallowing",
+    "Stomach Pain", "Nausea", "Bloating", "Loss of Appetite", "Dizziness", "Chest Pain",
+    "Mucus Production", "Chest Discomfort", "Red Eyes", "Eye Discharge", "Tearing",
+    "Burning Urination", "Frequent Urination", "Lower Abdominal Pain", "Jaundice",
+    "Abdominal Pain", "Light Sensitivity", "Vomiting", "Diarrhea", "Mild Fever",
+    "Muscle Pain"
+  ]
+}

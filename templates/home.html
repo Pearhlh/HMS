@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Welcome to Healthcare System{% endblock %}
+
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+        text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slideInUp {
+        animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    /* Gradient text */
+    .gradient-text {
+        background: linear-gradient(135deg, #1e40af 0%, #60a5fa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    /* Glassmorphism effect */
+    .glass {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+        .animate-slideInUp, .animate-pulseGlow {
+            animation: none;
+        }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+        .glass {
+            background: #ffffff;
+            border: 2px solid #1e40af;
+            backdrop-filter: none;
+        }
+        .gradient-text {
+            background: none;
+            -webkit-text-fill-color: #1e40af;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto max-w-5xl">
+        <div class="text-center mb-16 bg-gradient-to-b from-blue-100/60 to-white/60 glass rounded-3xl p-10 sm:p-16 animate-slideInUp">
+            <h1 class="text-4xl sm:text-5xl lg:text-7xl font-extrabold gradient-text tracking-tight mb-6 leading-tight">Welcome to Healthcare System</h1>
+            <p class="text-xl sm:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed font-medium">Your trusted partner for seamless healthcare management and wellness solutions</p>
+        </div>
+        
+        <div class="flex justify-center">
+            <div class="w-full max-w-4xl">
+                <div class="glass rounded-3xl p-10 sm:p-14 shadow-2xl transition-all duration-500 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-3 animate-slideInUp animate-pulseGlow">
+                    <div class="text-center">
+                        {% if user.is_authenticated %}
+                            <h2 class="text-3xl sm:text-4xl font-bold text-blue-900 mb-8 tracking-tight">Hello, {{ user.get_full_name|default:user.email }}</h2>
+                            
+                            {% if user.role == 'patient' %}
+                                <p class="text-gray-600 text-lg sm:text-xl mb-10 leading-relaxed">Access your patient dashboard to manage appointments, view medical records, and connect with your care team.</p>
+                                <a href="{% url 'patient:dashboard' %}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-500 text-white text-lg font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 animate-pulseGlow">Patient Dashboard</a>
+                            {% elif user.role == 'doctor' %}
+                                <p class="text-gray-600 text-lg sm:text-xl mb-10 leading-relaxed">Access your doctor dashboard to manage patient records, appointments, and consultations.</p>
+                                <a href="{% url 'doctor:dashboard' %}"class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-500 text-white text-lg font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 animate-pulseGlow">Doctor Dashboard</a>
+                            {% elif user.role == 'admin' %}
+                                <p class="text-gray-600 text-lg sm:text-xl mb-10 leading-relaxed">Access the administration panel to oversee system operations and manage users.</p>
+                                <a href="{% url 'admin:index' %}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-500 text-white text-lg font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 animate-pulseGlow">Admin Dashboard</a>
+                            {% elif user.role == 'pharmacist' or user.role == 'pharmacy' %}
+                                <p class="text-gray-600 text-lg sm:text-xl mb-10 leading-relaxed">Access the pharmacy dashboard to manage prescriptions, inventory, and patient orders.</p>
+                                <a href="{% url 'pharmacy:dashboard' %}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-500 text-white text-lg font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 animate-pulseGlow">Pharmacy Dashboard</a>
+                            {% elif user.role == 'insurance' or user.role == 'insurer' %}
+                                <p class="text-gray-600 text-lg sm:text-xl mb-10 leading-relaxed">Access the insurance dashboard to manage policies, claims, and verifications effortlessly.</p>
+                                <a href="{% url 'insurance:dashboard' %}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-500 text-white text-lg font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 animate-pulseGlow">Insurance Dashboard</a>
+                            {% else %}
+                                <p class="text-gray-600 text-lg sm:text-xl mb-10 leading-relaxed">Welcome to the Healthcare System. Explore your dashboard to get started.</p>
+                                <a href="{% url 'admin:index' %}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-500 text-white text-lg font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 animate-pulseGlow">Go to Dashboard</a>
+                            {% endif %}
+                        {% else %}
+                            <h2 class="text-3xl sm:text-4xl font-bold text-blue-900 mb-10 tracking-tight">Get Started</h2>
+                            <div class="grid gap-6 max-w-lg mx-auto sm:grid-cols-2">
+                                <a href="{% url 'account_login' %}" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-500 text-white text-lg font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 animate-pulseGlow">Sign In</a>
+                                <a href="{% url 'account_signup' %}" class="inline-flex items-center justify-center px-8 py-4 border-2 border-blue-600 text-blue-600 text-lg font-semibold rounded-xl bg-white/40 hover:bg-blue-50 hover:text-blue-700 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300">Create Account</a>
+                            </div>
+                            <div class="mt-10 flex flex-wrap justify-center gap-6">
+                                <a href="{% url 'patient:dashboard' %}" class="inline-flex items-center px-5 py-3 text-blue-600 text-base font-medium bg-blue-50/50 hover:bg-blue-100 hover:text-blue-700 rounded-lg transition-all duration-300">Patient Dashboard</a>
+                                <a href="{% url 'pharmacy:dashboard' %}" class="inline-flex items-center px-5 py-3 text-blue-600 text-base font-medium bg-blue-50/50 hover:bg-blue-100 hover:text-blue-700 rounded-lg transition-all duration-300">Pharmacy</a>
+                                <a href="{% url 'admin:index' %}" class="inline-flex items-center px-5 py-3 text-blue-600 text-base font-medium bg-blue-50/50 hover:bg-blue-100 hover:text-blue-700 rounded-lg transition-all duration-300">Admin</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

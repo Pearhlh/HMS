@@ -1,0 +1,109 @@
+{% load static %}
+<nav class="bg-white shadow-lg mb-6">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-4">
+    <!-- Mobile toggle button for sidebar -->
+    <button id="sidebarToggle" class="md:hidden p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300">
+      <i class="bi bi-list text-xl"></i>
+    </button>
+    
+    <!-- Brand -->
+    <a class="hidden md:block text-2xl font-bold text-blue-900 hover:text-blue-700 transition-colors duration-300" href="{% url 'home' %}">
+      Healthcare
+    </a>
+    
+    <!-- Navbar items (right-aligned) -->
+    <div class="flex items-center space-x-4">
+      <!-- User dropdown -->
+      <div class="relative">
+        <a href="#" class="flex items-center space-x-2 text-blue-900 hover:text-blue-700 transition-colors duration-300 animate-pulseGlow" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-blue-200">
+          {% else %}
+            <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
+              {{ user.get_full_name|slice:":2"|upper }}
+            </div>
+          {% endif %}
+          <span class="hidden md:inline text-base font-medium">{{ user.get_full_name|default:user.email }}</span>
+          <i class="bi bi-chevron-down text-sm transition-transform duration-200" id="chevronIcon"></i>
+        </a>
+        <ul class="absolute right-0 mt-2 w-56 bg-white glass rounded-xl shadow-xl z-10 border border-gray-100 dropdown-menu">
+          <li>
+            <div class="px-4 py-3 border-b border-gray-100">
+              <span class="block text-xs text-gray-500">Signed in as</span>
+              <span class="block text-sm font-semibold text-blue-900 truncate">{{ user.email }}</span>
+            </div>
+          </li>
+          <li>
+            <a class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200" href="{% url 'account_change_password' %}">
+              <i class="bi bi-key mr-2"></i> Change Password
+            </a>
+          </li>
+          <li>
+            <hr class="border-gray-100">
+          </li>
+          <li>
+            <a class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200" href="{% url 'account_logout' %}">
+              <i class="bi bi-box-arrow-right mr-2"></i> Sign Out
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  /* Forcefully remove underlines from all <a> tags */
+  a {
+    text-decoration: none !important;
+  }
+  /* Glassmorphism effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  /* Custom animations */
+  @keyframes pulseGlow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.4);
+    }
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .dropdown-menu {
+    animation: fadeIn 0.2s ease-out;
+    display: none;
+  }
+  .dropdown-menu.show {
+    display: block;
+  }
+  /* Rotate chevron when dropdown is open */
+  .show > #chevronIcon {
+    transform: rotate(180deg);
+  }
+  /* Reduced motion override */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-pulseGlow, .dropdown-menu {
+      animation: none;
+    }
+  }
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .glass {
+      background: #ffffff;
+      border: 2px solid #1e40af;
+      backdrop-filter: none;
+    }
+  }
+</style>

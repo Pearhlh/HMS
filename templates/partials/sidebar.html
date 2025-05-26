@@ -1,0 +1,271 @@
+<div class="col-md-3 col-lg-2 p-0">
+  <nav id="sidebar" class="sidebar d-md-block bg-white h-full border-r border-gray-100">
+    <div class="sticky top-0 pt-4">
+      <!-- User Info -->
+      <div class="px-4 py-5 mb-4 bg-blue-50 border-b border-gray-100">
+        <div class="flex items-center">
+          {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" alt="Profile" class="w-12 h-12 rounded-full object-cover border-2 border-blue-200 mr-3">
+          {% else %}
+            <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg font-semibold mr-3">
+              {{ user.get_full_name|slice:":2"|upper }}
+            </div>
+          {% endif %}
+          <div>
+            <h6 class="text-base font-semibold text-blue-900 mb-0">{{ user.get_full_name }}</h6>
+            <div class="text-gray-600 text-sm">{{ user.get_role_display }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Menu Based on User Role -->
+      {% if user.is_patient %}
+        <!-- Patient Navigation -->
+        <ul class="space-y-1">
+          <li>
+            <a href="{% url 'patient:dashboard' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-house-door mr-3 text-lg"></i> Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'patient:appointments' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if 'appointment' in request.resolver_match.url_name %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-calendar-check mr-3 text-lg"></i> Appointments
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'patient:medical_records' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if 'medical_record' in request.resolver_match.url_name %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-file-earmark-medical mr-3 text-lg"></i> Medical Records
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'patient:prescriptions' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if 'prescription' in request.resolver_match.url_name %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-prescription2 mr-3 text-lg"></i> Prescriptions
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'patient:test_results' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if 'test_result' in request.resolver_match.url_name %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-clipboard-data mr-3 text-lg"></i> Test Results
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'patient:bills' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if 'bill' in request.resolver_match.url_name %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-credit-card mr-3 text-lg"></i> Billing & Payments
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'patient:notifications' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'notifications' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-bell mr-3 text-lg"></i> Notifications
+              {% if unread_notifications_count > 0 %}
+                <span class="ml-2 inline-block px-2 py-1 text-xs font-semibold rounded-full bg-red-500 text-white">{{ unread_notifications_count }}</span>
+              {% endif %}
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'patient:profile' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if 'profile' in request.resolver_match.url_name %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-person mr-3 text-lg"></i> My Profile
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'chatboxai:chat' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'chat' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-robot mr-3 text-lg"></i> Healthcare Assistant
+              <span class="ml-2 inline-block px-2 py-1 text-xs font-semibold rounded-full bg-green-500 text-white">AI</span>
+            </a>
+          </li>
+        </ul>
+      
+      {% elif user.is_doctor %}
+        <!-- Doctor Navigation -->
+        <ul class="space-y-1">
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-house-door mr-3 text-lg"></i> Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-calendar-check mr-3 text-lg"></i> Appointments
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-people mr-3 text-lg"></i> Patients
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-prescription2 mr-3 text-lg"></i> Prescriptions
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-clipboard-data mr-3 text-lg"></i> Lab Orders
+            </a>
+          </li>
+        </ul>
+      
+      {% elif user.is_nurse %}
+        <!-- Nurse Navigation -->
+        <ul class="space-y-1">
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-house-door mr-3 text-lg"></i> Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-people mr-3 text-lg"></i> Patients
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-heart-pulse mr-3 text-lg"></i> Vital Signs
+            </a>
+          </li>
+        </ul>
+      
+      {% elif user.is_pharmacist or user.role == 'pharmacy' or user.role == 'pharmacist' %}
+        <!-- Pharmacist Navigation -->
+        <ul class="space-y-1">
+          <li>
+            <a href="{% url 'pharmacy:dashboard' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-house-door mr-3 text-lg"></i> Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'pharmacy:prescription_list' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'prescription_list' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-prescription2 mr-3 text-lg"></i> Prescriptions
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-box-seam mr-3 text-lg"></i> Inventory
+            </a>
+          </li>
+        </ul>
+      
+      {% elif user.is_lab_technician %}
+        <!-- Lab Technician Navigation -->
+        <ul class="space-y-1">
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-house-door mr-3 text-lg"></i> Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-clipboard-data mr-3 text-lg"></i> Test Orders
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-file-earmark-text mr-3 text-lg"></i> Results
+            </a>
+          </li>
+        </ul>
+      
+      {% elif user.role == 'insurance' or user.role == 'insurer' %}
+        <!-- Insurance Provider Navigation -->
+        <ul class="space-y-1">
+          <li>
+            <a href="{% url 'insurance:dashboard' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-house-door mr-3 text-lg"></i> Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'insurance:policy_list' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'policy_list' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-shield-check mr-3 text-lg"></i> Insurance Policies
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'insurance:claim_list' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'claim_list' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-file-earmark-text mr-3 text-lg"></i> Claims
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'insurance:verification_requests' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'verification_requests' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-clipboard-check mr-3 text-lg"></i> Verification Requests
+            </a>
+          </li>
+        </ul>
+      
+      {% elif user.is_admin %}
+        <!-- Admin Navigation -->
+        <ul class="space-y-1">
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-100 text-blue-900{% endif %}">
+              <i class="bi bi-house-door mr-3 text-lg"></i> Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-people mr-3 text-lg"></i> Users
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-graph-up mr-3 text-lg"></i> Reports
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+              <i class="bi bi-gear mr-3 text-lg"></i> Settings
+            </a>
+          </li>
+        </ul>
+      {% endif %}
+
+      <!-- Common Links for All Users -->
+      <hr class="my-4 border-gray-100">
+      <div class="px-4">
+        <h6 class="text-sm font-semibold text-gray-500 uppercase mb-2">Account</h6>
+      </div>
+      <ul class="space-y-1 mb-4">
+        <li>
+          <a href="{% url 'patient:profile' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200 {% if 'profile' in request.resolver_match.url_name %}bg-blue-100 text-blue-900{% endif %}">
+            <i class="bi bi-person-circle mr-3 text-lg"></i> My Profile
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'account_change_password' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+            <i class="bi bi-key mr-3 text-lg"></i> Change Password
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'account_logout' %}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition-all duration-200">
+            <i class="bi bi-box-arrow-right mr-3 text-lg"></i> Sign Out
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</div>
+
+<style>
+  /* Forcefully remove underlines from all <a> tags */
+  a {
+    text-decoration: none !important;
+  }
+  /* Sidebar specific styles */
+  .sidebar {
+    min-height: 100vh;
+    transition: transform 0.3s ease-in-out;
+  }
+  @media (max-width: 767.98px) {
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 250px;
+      z-index: 1000;
+    }
+    .sidebar.show {
+      transform: translateX(100%);
+    }
+  }
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    a {
+      color: #1e40af;
+    }
+  }
+</style>

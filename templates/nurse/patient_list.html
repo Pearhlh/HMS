@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Patient List | Nurse Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Patient List</h1>
+    <div>
+      <a href="{% url 'nurse:dashboard' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+      </a>
+    </div>
+  </div>
+  
+  {% if messages %}
+    <div class="messages mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  
+  <!-- Search and Filter -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search by name or email..." name="search" value="{{ search_query }}">
+            <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i> Search</button>
+            {% if search_query %}
+              <a href="{% url 'nurse:patient_list' %}" class="btn btn-outline-secondary"><i class="bi bi-x"></i> Clear</a>
+            {% endif %}
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Patient List -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">Patient List</h5>
+      <span class="badge bg-primary">{{ patients|length }} Patients</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th>Date of Birth</th>
+              <th>Gender</th>
+              <th>Last Vital Check</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for patient in patients %}
+              <tr>
+                <td>{{ patient.user.get_full_name }}</td>
+                <td>{{ patient.date_of_birth|date:"M d, Y"|default:"Not provided" }}</td>
+                <td>{{ patient.get_gender_display|default:"Not specified" }}</td>
+                <td>
+                  {% if patient.vitals.exists %}
+                    {{ patient.vitals.first.recorded_at|date:"M d, Y H:i"|default:"Never" }}
+                  {% else %}
+                    Never
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="{% url 'nurse:patient_detail' patient.id %}" class="btn btn-outline-primary">
+                      <i class="bi bi-eye"></i> View
+                    </a>
+                    <a href="{% url 'nurse:update_vitals' patient.id %}" class="btn btn-outline-success">
+                      <i class="bi bi-clipboard-pulse"></i> Update Vitals
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center py-4">No patients found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

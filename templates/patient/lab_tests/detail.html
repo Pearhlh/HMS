@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Lab Test Results | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'patient:dashboard' %}">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'patient:medical_records' %}">Medical Records</a></li>
+      <li class="breadcrumb-item active">Lab Test Results</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Lab Test Results</h1>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">{{ test.get_test_type_display }}</h5>
+      <span class="badge {% if test.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
+        {{ test.get_status_display }}
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label class="form-label text-muted">Test Type</label>
+            <p class="form-control-plaintext">{{ test.get_test_type_display }}</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted">Date Requested</label>
+            <p class="form-control-plaintext">{{ test.created_at|date:"F j, Y" }}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label class="form-label text-muted">Doctor</label>
+            <p class="form-control-plaintext">
+              {% if test.requested_by %}
+                Dr. {{ test.requested_by.user.get_full_name }}
+              {% else %}
+                Not specified
+              {% endif %}
+            </p>
+          </div>
+          {% if test.completed_date %}
+          <div class="mb-3">
+            <label class="form-label text-muted">Date Completed</label>
+            <p class="form-control-plaintext">{{ test.completed_date|date:"F j, Y" }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="form-label text-muted">Description</label>
+        <div class="p-3 bg-light rounded">
+          {{ test.description }}
+        </div>
+      </div>
+      
+      {% if test.results %}
+        <div class="mb-0">
+          <label class="form-label text-muted">Results</label>
+          <div class="p-3 bg-light rounded">
+            {{ test.results|linebreaksbr }}
+          </div>
+        </div>
+      {% else %}
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Test results are not available yet.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

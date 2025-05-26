@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Prescriptions | Pharmacy System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Prescriptions</h1>
+  </div>
+
+  <!-- Filters -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-md-4">
+          <label for="status" class="form-label">Status</label>
+          <select id="status" name="status" class="form-select">
+            <option value="">All Statuses</option>
+            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="verified" {% if request.GET.status == 'verified' %}selected{% endif %}>Verified</option>
+            <option value="dispensed" {% if request.GET.status == 'dispensed' %}selected{% endif %}>Dispensed</option>
+            <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Rejected</option>
+          </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary">Filter</button>
+          <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-outline-secondary ms-2">Reset</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Prescription List -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      {% if prescriptions %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Date</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Details</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for prescription in prescriptions %}
+                <tr>
+                  <td>{{ prescription.date_prescribed|date:"M d, Y" }}</td>
+                  <td>{{ prescription.patient.user.get_full_name }}</td>
+                  <td>Dr. {{ prescription.doctor.user.get_full_name }}</td>
+                  <td>{{ prescription.notes|truncatechars:30 }}</td>
+                  <td>
+                    <span class="badge 
+                      {% if prescription.status == 'pending' %}bg-warning
+                      {% elif prescription.status == 'verified' %}bg-info
+                      {% elif prescription.status == 'dispensed' %}bg-success
+                      {% else %}bg-danger{% endif %}">
+                      {{ prescription.get_status_display }}
+                    </span>
+                  </td>
+                  <td>
+                    <a href="{% url 'pharmacy:process_prescription' prescription.id %}" class="btn btn-sm btn-primary">
+                      Process
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-5">
+          <p class="text-muted mb-0">No prescriptions found</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

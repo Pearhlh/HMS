@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Create Invoice | Pharmacy System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'pharmacy:dashboard' %}">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'pharmacy:prescription_list' %}">Prescriptions</a></li>
+      <li class="breadcrumb-item active">Create Invoice</li>
+    </ol>
+  </nav>
+
+  {% if messages %}
+    <div class="messages mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white">
+      <h5 class="card-title mb-0">Create Prescription Invoice</h5>
+    </div>
+    <div class="card-body">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <h6 class="mb-3">Patient Information</h6>
+          <p class="mb-1"><strong>Patient:</strong> {{ dispensing.patient.user.get_full_name }}</p>
+          <p class="mb-1"><strong>Email:</strong> {{ dispensing.patient.user.email }}</p>
+        </div>
+        <div class="col-md-6">
+          <h6 class="mb-3">Prescription Information</h6>
+          <p class="mb-1"><strong>Prescription ID:</strong> {{ dispensing.prescription.id }}</p>
+          <p class="mb-1"><strong>Doctor:</strong> Dr. {{ dispensing.prescription.doctor.user.get_full_name }}</p>
+          <p class="mb-1"><strong>Date Prescribed:</strong> {{ dispensing.prescription.date_prescribed|date:"F j, Y" }}</p>
+        </div>
+      </div>
+      
+      <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        
+        <div class="mt-4 d-flex justify-content-end">
+          <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-outline-secondary me-2">Cancel</a>
+          <button type="submit" class="btn btn-primary">Create Invoice</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

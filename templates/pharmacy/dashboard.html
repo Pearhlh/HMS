@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pharmacy Dashboard | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Pharmacy Dashboard</h1>
+    <div class="text-muted">
+      Welcome, {{ user.get_full_name }}
+    </div>
+  </div>
+
+  {% if messages %}
+    <div class="messages mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Pending Prescriptions</h5>
+          <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-sm btn-primary">View All</a>
+        </div>
+        <div class="card-body p-0">
+          {% if pending_prescriptions %}
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for prescription in pending_prescriptions %}
+                    <tr>
+                      <td>{{ prescription.date_prescribed|date:"M d, Y" }}</td>
+                      <td>{{ prescription.patient.user.get_full_name }}</td>
+                      <td>Dr. {{ prescription.doctor.user.get_full_name }}</td>
+                      <td><span class="badge bg-warning">{{ prescription.get_status_display }}</span></td>
+                      <td>
+                        <button class="btn btn-sm btn-primary">Process</button>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-center py-5">
+              <p class="text-muted mb-0">No pending prescriptions</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-primary">
+              <i class="bi bi-list-check me-2"></i> View All Prescriptions
+            </a>
+            <a href="{% url 'pharmacy:prescription_list' %}?status=dispensed" class="btn btn-outline-success">
+              <i class="bi bi-check-circle me-2"></i> Dispensed Medications
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Laboratory Dashboard | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Laboratory Dashboard</h1>
+    <div class="text-muted">
+      Welcome, {{ user.get_full_name }}
+    </div>
+  </div>
+
+  {% if messages %}
+    <div class="messages mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-md-8">
+      <!-- Pending Tests Section -->
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Pending Test Requests</h5>
+          <a href="{% url 'laboratory:test_list' %}?status=requested" class="btn btn-sm btn-primary">
+            View All Pending Tests
+          </a>
+        </div>
+        <div class="card-body p-0">
+          {% if pending_tests %}
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Patient</th>
+                  <th>Test Type</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for test in pending_tests %}
+                <tr>
+                  <td>{{ test.created_at|date:"M d, Y" }}</td>
+                  <td>{{ test.patient.user.get_full_name }}</td>
+                  <td>{{ test.get_test_type_display }}</td>
+                  <td><span class="badge bg-warning">{{ test.get_status_display }}</span></td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <a href="{% url 'laboratory:test_detail' test.id %}" class="btn btn-primary">View</a>
+                      <form method="post" action="{% url 'laboratory:update_test_status' test.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="in_progress">
+                        <button type="submit" class="btn btn-info">Start Processing</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <p class="text-muted">No pending test requests.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- In Progress Tests -->
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Tests In Progress</h5>
+        </div>
+        <div class="card-body p-0">
+          {% if in_progress_tests %}
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Patient</th>
+                  <th>Test Type</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for test in in_progress_tests %}
+                <tr>
+                  <td>{{ test.requested_date|date:"M d, Y" }}</td>
+                  <td>{{ test.patient.user.get_full_name }}</td>
+                  <td>{{ test.get_test_type_display }}</td>
+                  <td>
+                    <a href="{% url 'laboratory:test_detail' test.id %}" class="btn btn-sm btn-success">Enter Results</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <p class="text-muted">No tests currently in progress.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+     
+    </div>
+    
+    <div class="col-md-4">
+      <!-- Quick Actions -->
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="{% url 'laboratory:test_list' %}" class="btn btn-primary">
+              <i class="bi bi-list-check me-2"></i> View All Tests
+            </a>
+            <a href="{% url 'laboratory:test_list' %}?status=in_progress" class="btn btn-outline-info">
+              <i class="bi bi-clipboard-data me-2"></i> View Tests In Progress
+            </a>
+            <a href="{% url 'laboratory:test_list' %}?status=completed" class="btn btn-outline-success">
+              <i class="bi bi-check-circle me-2"></i> View Completed Tests
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Lab Statistics</h5>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-6 mb-3">
+              <h3 class="text-primary mb-1">{{ pending_count }}</h3>
+              <p class="text-muted mb-0">Pending Tests</p>
+            </div>
+            <div class="col-6 mb-3">
+              <h3 class="text-info mb-1">{{ in_progress_count }}</h3>
+              <p class="text-muted mb-0">In Progress</p>
+            </div>
+            <div class="col-6">
+              <h3 class="text-success mb-1">{{ completed_today_count }}</h3>
+              <p class="text-muted mb-0">Completed Today</p>
+            </div>
+            <div class="col-6">
+              <h3 class="text-secondary mb-1">-</h3>
+              <p class="text-muted mb-0">Average Time</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

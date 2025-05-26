@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Nurse Dashboard | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Nurse Dashboard</h1>
+    <div class="text-muted">
+      Welcome, {{ user.get_full_name }}
+    </div>
+  </div>
+
+  {% if messages %}
+    <div class="messages mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+         
+        </div>
+        
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Recent Vitals Updates</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            {% for patient in recent_patients %}
+              <a href="{% url 'nurse:patient_detail' patient.id %}" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">{{ patient.user.get_full_name }}</h6>
+                  <small class="text-muted">
+                    {{ patient.vitals.first.recorded_at|timesince }} ago
+                  </small>
+                </div>
+                <p class="mb-1 small">
+                  Temp: {{ patient.vitals.first.temperature }}°C | 
+                  BP: {{ patient.vitals.first.blood_pressure }} mmHg | 
+                  HR: {{ patient.vitals.first.heart_rate }} bpm
+                </p>
+              </a>
+            {% empty %}
+              <div class="list-group-item text-center py-4">
+                <p class="mb-0">No recent vitals updates found.</p>
+                <small class="text-muted">Start recording vitals for your patients.</small>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="card-footer bg-white">
+          <a href="{% url 'nurse:patient_list' %}" class="btn btn-outline-primary">View All Patients</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Quick Links</h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+            <a href="{% url 'nurse:patient_list' %}" class="list-group-item list-group-item-action">
+              <i class="bi bi-people me-2"></i> Patient List
+            </a>
+          
+            </a>
+           
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

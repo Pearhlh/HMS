@@ -1,0 +1,8 @@
+{% for test in tests %}
+<tr>
+    <td>{{ test.id }}</td>
+    <td>{{ test.patient.user.get_full_name }}</td>
+    <td>{{ test.test_type }}</td>
+    <td>{{ test.created_at|date:"M d, Y" }}</td>
+</tr>
+{% endfor %}

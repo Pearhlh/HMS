@@ -1,0 +1,139 @@
+{
+  "diseases": [
+    {
+      "name": "Flu",
+      "symptoms": ["Fever", "Cough", "Fatigue", "Sore Throat", "Headache", "Muscle Pain"],
+      "tests": ["Influenza A/B test", "Nasal swab"],
+      "treatments": ["Oseltamivir (Tamiflu)", "Rest", "Hydration"],
+      "severity": "Moderate",
+      "advice": "Nghỉ ngơi, uống nhiều nước, tránh tiếp xúc gần với người khác.",
+      "prevalence": 0.3
+    },
+    {
+      "name": "Cold",
+      "symptoms": ["Cough", "Sneezing", "Runny Nose", "Sore Throat", "Mild Fever"],
+      "tests": ["Nasal swab"],
+      "treatments": ["Rest", "Fluids", "Antihistamines"],
+      "severity": "Mild",
+      "advice": "Giữ ấm, tránh gió lạnh, dùng khăn giấy khi hắt hơi.",
+      "prevalence": 0.4
+    },
+    {
+      "name": "COVID-19", 
+      "symptoms": ["Fever", "Cough", "Loss of Taste", "Shortness of Breath", "Fatigue"],
+      "tests": ["PCR test", "Rapid antigen test"],
+      "treatments": ["Isolation", "Paracetamol", "Consult doctor"],
+      "severity": "Severe",
+      "advice": "Cách ly tại nhà, theo dõi SpO2, gọi bác sĩ nếu khó thở.",
+      "prevalence": 0.1
+    },
+    {
+      "name": "Allergy",
+      "symptoms": ["Sneezing", "Itchy Eyes", "Runny Nose", "Rash"],
+      "tests": ["Allergy skin test", "Blood IgE test"],
+      "treatments": ["Loratadine", "Cetirizine", "Avoid allergens"],
+      "severity": "Mild",
+      "advice": "Tránh tiếp xúc với chất gây dị ứng như phấn hoa, bụi.",
+      "prevalence": 0.2
+    },
+    {
+      "name": "Dengue Fever",
+      "symptoms": ["High Fever", "Severe Headache", "Joint Pain", "Rash", "Bleeding"],
+      "tests": ["NS1 antigen test", "Dengue IgM/IgG test"],
+      "treatments": ["Hydration", "Paracetamol", "Hospitalization if severe"],
+      "severity": "Severe",
+      "advice": "Tránh muỗi đốt, đi khám ngay nếu sốt cao liên tục.",
+      "prevalence": 0.05
+    },
+    {
+      "name": "Strep Throat",
+      "symptoms": ["Sore Throat", "Fever", "Swollen Tonsils", "Difficulty Swallowing"],
+      "tests": ["Throat swab", "Rapid strep test"],
+      "treatments": ["Antibiotics (Amoxicillin)", "Pain relievers"],
+      "severity": "Moderate",
+      "advice": "Nghỉ ngơi, uống nước ấm, không dùng chung đồ với người khác.",
+      "prevalence": 0.15
+    },
+    {
+      "name": "Gastritis",
+      "symptoms": ["Stomach Pain", "Nausea", "Bloating", "Loss of Appetite"],
+      "tests": ["Endoscopy", "H. pylori test"],
+      "treatments": ["Antacids", "Proton pump inhibitors", "Avoid spicy food"],
+      "severity": "Moderate",
+      "advice": "Ăn uống điều độ, tránh rượu bia và thực phẩm kích thích.",
+      "prevalence": 0.1
+    },
+    {
+      "name": "Hypertension",
+      "symptoms": ["Headache", "Dizziness", "Chest Pain", "Shortness of Breath"],
+      "tests": ["Blood pressure measurement", "ECG"],
+      "treatments": ["Lifestyle changes", "Amlodipine", "Regular monitoring"],
+      "severity": "Severe",
+      "advice": "Giảm muối, tập thể dục, kiểm tra huyết áp thường xuyên.",
+      "prevalence": 0.2
+    },
+    {
+      "name": "Bronchitis",
+      "symptoms": ["Cough", "Mucus Production", "Fatigue", "Chest Discomfort"],
+      "tests": ["Chest X-ray", "Sputum test"],
+      "treatments": ["Rest", "Bronchodilators", "Hydration"],
+      "severity": "Moderate",
+      "advice": "Tránh khói bụi, giữ ẩm không khí, không hút thuốc.",
+      "prevalence": 0.08
+    },
+    {
+      "name": "Conjunctivitis",
+      "symptoms": ["Red Eyes", "Itchy Eyes", "Eye Discharge", "Tearing"],
+      "tests": ["Eye swab", "Clinical examination"],
+      "treatments": ["Antibiotic eye drops", "Warm compress", "Avoid rubbing eyes"],
+      "severity": "Mild",
+      "advice": "Rửa tay thường xuyên, không dùng chung khăn với người khác.",
+      "prevalence": 0.12
+    },
+    {
+      "name": "Pneumonia",
+      "symptoms": ["Fever", "Cough", "Shortness of Breath", "Chest Pain", "Fatigue"],
+      "tests": ["Chest X-ray", "Blood culture"],
+      "treatments": ["Antibiotics", "Oxygen therapy", "Hospitalization"],
+      "severity": "Severe",
+      "advice": "Đi khám ngay nếu khó thở, nghỉ ngơi và tuân thủ điều trị.",
+      "prevalence": 0.07
+    },
+    {
+      "name": "Urinary Tract Infection",
+      "symptoms": ["Burning Urination", "Frequent Urination", "Lower Abdominal Pain"],
+      "tests": ["Urine culture", "Urinalysis"],
+      "treatments": ["Antibiotics (Nitrofurantoin)", "Hydration"],
+      "severity": "Moderate",
+      "advice": "Uống nhiều nước, vệ sinh sạch sẽ, đi khám nếu triệu chứng kéo dài.",
+      "prevalence": 0.15
+    },
+    {
+      "name": "Hepatitis A",
+      "symptoms": ["Fatigue", "Nausea", "Jaundice", "Abdominal Pain", "Fever"],
+      "tests": ["Liver function test", "Anti-HAV IgM test"],
+      "treatments": ["Rest", "Hydration", "Avoid alcohol"],
+      "severity": "Moderate",
+      "advice": "Ăn uống vệ sinh, tiêm vắc-xin phòng ngừa nếu chưa tiêm.",
+      "prevalence": 0.03
+    },
+    {
+      "name": "Migraine",
+      "symptoms": ["Severe Headache", "Nausea", "Light Sensitivity", "Dizziness"],
+      "tests": ["Neurological exam", "MRI if needed"],
+      "treatments": ["Triptans", "Rest in dark room", "Pain relievers"],
+      "severity": "Moderate",
+      "advice": "Tránh ánh sáng mạnh, giảm căng thẳng, ngủ đủ giấc.",
+      "prevalence": 0.1
+    },
+    {
+      "name": "Food Poisoning",
+      "symptoms": ["Nausea", "Vomiting", "Diarrhea", "Abdominal Pain", "Fever"],
+      "tests": ["Stool culture", "Blood test"],
+      "treatments": ["Hydration", "Rest", "Antibiotics if bacterial"],
+      "severity": "Moderate",
+      "advice": "Uống nước bù điện giải, tránh ăn thức ăn nghi ngờ nhiễm khuẩn.",
+      "prevalence": 0.15
+    }
+  ]
+}

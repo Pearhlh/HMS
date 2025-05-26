@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Invoice #{{ invoice.invoice_number }} | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'patient:dashboard' %}">Dashboard</a></li>
+      <li class="breadcrumb-item active">Invoice #{{ invoice.invoice_number }}</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Prescription Invoice</h1>
+    <div>
+      <button class="btn btn-outline-primary" onclick="window.print()">
+        <i class="bi bi-printer me-1"></i> Print
+      </button>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body p-4">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <h2 class="h5 mb-3">Invoice #{{ invoice.invoice_number }}</h2>
+          <p class="mb-1"><strong>Date Created:</strong> {{ invoice.created_date|date:"F j, Y" }}</p>
+          <p class="mb-1"><strong>Due Date:</strong> {{ invoice.due_date|date:"F j, Y" }}</p>
+          <p class="mb-0"><strong>Status:</strong> 
+            <span class="badge 
+              {% if invoice.status == 'pending' %}bg-warning
+              {% elif invoice.status == 'paid' %}bg-success
+              {% else %}bg-danger{% endif %}">
+              {{ invoice.get_status_display }}
+            </span>
+          </p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <h4 class="h5 mb-3">Healthcare Pharmacy</h4>
+          <p class="mb-1">123 Medical Center Avenue</p>
+          <p class="mb-1">City, State ZIP</p>
+          <p class="mb-0">Phone: (123) 456-7890</p>
+        </div>
+      </div>
+      
+      <hr>
+      
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <h5 class="h6 mb-2">Billed To:</h5>
+          <p class="mb-1"><strong>{{ invoice.patient.user.get_full_name }}</strong></p>
+          <p class="mb-1">{{ invoice.patient.user.email }}</p>
+        </div>
+        <div class="col-md-6">
+          <h5 class="h6 mb-2">Prescription Details:</h5>
+          <p class="mb-1"><strong>Doctor:</strong> Dr. {{ invoice.prescription_dispensing.prescription.doctor.user.get_full_name }}</p>
+          <p class="mb-1"><strong>Prescribed:</strong> {{ invoice.prescription_dispensing.prescription.date_prescribed|date:"F j, Y" }}</p>
+        </div>
+      </div>
+      
+      <div class="table-responsive mb-4">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Medication</th>
+              <th>Dosage</th>
+              <th>Quantity</th>
+              <th class="text-end">Unit Price</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cost_item in medication_costs %}
+            <tr>
+              <td>{{ cost_item.medication.medication_name }}</td>
+              <td>{{ cost_item.medication.dosage }}</td>
+              <td>{{ cost_item.medication.quantity }}</td>
+              <td class="text-end">${{ cost_item.price_per_unit|floatformat:2 }}</td>
+              <td class="text-end">${{ cost_item.item_total|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center">No medications listed</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="text-end"><strong>Total</strong></td>
+              <td class="text-end"><strong>${{ invoice.total_amount|floatformat:2 }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      
+      {% if invoice.notes %}
+      <div class="mb-4">
+        <h5 class="h6 mb-2">Notes:</h5>
+        <div class="p-3 bg-light rounded">
+          {{ invoice.notes|linebreaksbr }}
+        </div>
+      </div>
+      {% endif %}
+      
+      <div class="mt-4">
+        <p class="mb-1 text-center">Please pay by the due date: {{ invoice.due_date|date:"F j, Y" }}</p>
+        
+        {% if invoice.status == 'pending' %}
+        <div class="text-center mt-4">
+          <form method="post" action="{% url 'patient:bills' %}">
+            {% csrf_token %}
+            <input type="hidden" name="invoice_id" value="{{ invoice.id }}">
+            <button type="submit" class="btn btn-primary">Pay Now</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

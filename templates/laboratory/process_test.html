@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Process Lab Test{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-4">
+        <a href="{% url 'lab_dashboard' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="mb-0">Process Lab Test #{{ lab_test.id }}</h4>
+        </div>
+        <div class="card-body">
+            <!-- Test Details -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="card-title">Test Details</h5>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th width="35%">Test Name</th>
+                                <td>{{ lab_test.test_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Patient</th>
+                                <td>{{ lab_test.patient.user.get_full_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>MRN</th>
+                                <td>{{ lab_test.patient.medical_record_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Ordered By</th>
+                                <td>Dr. {{ lab_test.doctor.user.get_full_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Test Date</th>
+                                <td>{{ lab_test.test_date|date:"F d, Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Current Status</th>
+                                <td>
+                                    {% if lab_test.status == 'ordered' %}
+                                        <span class="badge bg-warning">{{ lab_test.get_status_display }}</span>
+                                    {% elif lab_test.status == 'collected' %}
+                                        <span class="badge bg-info">{{ lab_test.get_status_display }}</span>
+                                    {% elif lab_test.status == 'in_process' %}
+                                        <span class="badge bg-primary">{{ lab_test.get_status_display }}</span>
+                                    {% elif lab_test.status == 'completed' %}
+                                        <span class="badge bg-success">{{ lab_test.get_status_display }}</span>
+                                    {% elif lab_test.status == 'canceled' %}
+                                        <span class="badge bg-danger">{{ lab_test.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Notes</th>
+                                <td>{{ lab_test.notes|default:"No notes provided" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="col-md-6">
+                    <!-- Update Status Form -->
+                    <h5 class="card-title">Update Status</h5>
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label for="status" class="form-label">Change Status</label>
+                                    <select name="status" id="status" class="form-select">
+                                        <option value="ordered" {% if lab_test.status == 'ordered' %}selected{% endif %}>Ordered</option>
+                                        <option value="collected" {% if lab_test.status == 'collected' %}selected{% endif %}>Sample Collected</option>
+                                        <option value="in_process" {% if lab_test.status == 'in_process' %}selected{% endif %}>In Process</option>
+                                        <option value="completed" {% if lab_test.status == 'completed' %}selected{% endif %}>Completed</option>
+                                        <option value="canceled" {% if lab_test.status == 'canceled' %}selected{% endif %}>Canceled</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle me-2"></i>Update Status
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Upload Report Form -->
+                    <h5 class="card-title">Upload Test Report</h5>
+                    <form method="post" enctype="multipart/form-data" class="mb-4">
+                        {% csrf_token %}
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label for="report_file" class="form-label">Report File</label>
+                                    <input type="file" name="report_file" id="report_file" class="form-control">
+                                    <div class="form-text">Upload PDF, DOC or JPG files (max 10MB)</div>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-upload me-2"></i>Upload Report
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Test Results Section -->
+            <h5 class="card-title">Test Results</h5>
+            <form method="post" class="mb-4">
+                {% csrf_token %}
+                <div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="{{ result_form.result_value.id_for_label }}" class="form-label">Result Value</label>
+                                    {% render_field result_form.result_value class="form-control" %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="{{ result_form.reference_range.id_for_label }}" class="form-label">Reference Range</label>
+                                    {% render_field result_form.reference_range class="form-control" %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="{{ result_form.is_abnormal.id_for_label }}" class="form-label">Is Abnormal</label>
+                                    <div class="form-check mt-2">
+                                        {% render_field result_form.is_abnormal class="form-check-input" %}
+                                        <label class="form-check-label" for="{{ result_form.is_abnormal.id_for_label }}">
+                                            Abnormal Result
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="{{ result_form.notes.id_for_label }}" class="form-label">Notes</label>
+                            {% render_field result_form.notes class="form-control" rows="3" %}
+                        </div>
+                        <button type="submit" name="add_result" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Add Result
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Existing Results -->
+            <h5 class="card-title">Recorded Results</h5>
+            {% if lab_test.test_results.all %}
+                <div class="table-responsive mb-4">
+                    <table class="table table-striped table-bordered">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Result Value</th>
+                                <th>Reference Range</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                                <th>Added By</th>
+                                <th>Added At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in lab_test.test_results.all %}
+                                <tr>
+                                    <td>{{ result.result_value }}</td>
+                                    <td>{{ result.reference_range }}</td>
+                                    <td>
+                                        {% if result.is_abnormal %}
+                                            <span class="badge bg-danger">Abnormal</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Normal</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ result.notes|default:"-" }}</td>
+                                    <td>{{ result.uploaded_by.get_full_name }}</td>
+                                    <td>{{ result.uploaded_at|date:"M d, Y H:i" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">No results have been recorded yet.</div>
+            {% endif %}
+            
+            <!-- Complete Test Section -->
+            {% if lab_test.test_results.all and lab_test.status != 'completed' %}
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Complete Test</h5>
+                        <p>All required results have been added. You can now mark this test as completed.</p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="completed">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check2-circle me-2"></i>Mark Test as Completed
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

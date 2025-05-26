@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Request Lab Test | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'doctor:dashboard' %}">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'doctor:patients' %}">Patients</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'doctor:patient_detail' patient.id %}">{{ patient.user.get_full_name }}</a></li>
+      <li class="breadcrumb-item active">Request Lab Test</li>
+    </ol>
+  </nav>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Request Lab Test for {{ patient.user.get_full_name }}</h5>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="test_type" class="form-label">Test Type</label>
+              <select class="form-select" id="test_type" name="test_type" required>
+                <option value="">Select a test type</option>
+                <option value="blood">Blood Test</option>
+                <option value="urine">Urine Test</option>
+                <option value="imaging">Imaging</option>
+                <option value="cardiac">Cardiac</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="description" class="form-label">Description/Reason</label>
+              <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+              <small class="form-text text-muted">Describe why this test is needed and what you're looking for.</small>
+            </div>
+            
+            <div class="mb-3">
+              <label for="instructions" class="form-label">Special Instructions</label>
+              <textarea class="form-control" id="instructions" name="instructions" rows="3"></textarea>
+              <small class="form-text text-muted">Add any special instructions for the technician or patient.</small>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <a href="{% url 'doctor:patient_detail' patient.id %}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary">Submit Test Request</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

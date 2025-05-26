@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Insurance Claims | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Insurance Claims</h1>
+    <div>
+      <a href="{% url 'insurance:dashboard' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  {% if messages %}
+    <div class="messages mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Filters -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+      <h5 class="card-title mb-0">Search & Filter</h5>
+    </div>
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Search</label>
+          <input type="text" class="form-control" name="search" value="{{ search_term }}" placeholder="Search by claim number, patient...">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Status</label>
+          <select class="form-select" name="status">
+            <option value="">All Statuses</option>
+            {% for status_code, status_label in status_choices %}
+              <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>{{ status_label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-search me-2"></i>Filter
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Claims List -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">Claims</h5>
+      <a href="{% url 'insurance:create_claim' %}" class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>
+      </a>
+    </div>
+    <div class="card-body p-0">
+      {% if claims %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Claim #</th>
+                <th>Patient</th>
+                <th>Service Date</th>
+                <th>Claim Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for claim in claims %}
+                <tr>
+                  <td>{{ claim.claim_number }}</td>
+                  <td>{{ claim.patient.user.get_full_name }}</td>
+                  <td>{{ claim.service_date|date:"M d, Y" }}</td>
+                  <td>${{ claim.claim_amount }}</td>
+                  <td>
+                    <span class="badge {% if claim.approval_status == 'approved' %}bg-success{% elif claim.approval_status == 'pending' %}bg-warning{% elif claim.approval_status == 'partial' %}bg-info{% elif claim.approval_status == 'rejected' %}bg-danger{% else %}bg-secondary{% endif %}">
+                      {{ claim.get_approval_status_display }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <a href="{% url 'insurance:claim_detail' claim.id %}" class="btn btn-outline-primary">
+                        <i class="bi bi-eye"></i> View
+                      </a>
+                      {% if claim.approval_status == 'pending' and request.user.role == 'insurance' %}
+                        <a href="{% url 'insurance:process_claim' claim.id %}" class="btn btn-outline-success">
+                          <i class="bi bi-check-circle"></i> Process
+                        </a>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Page navigation" class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}" aria-label="First">
+                  <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <li class="page-item active"><a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}">{{ num }}</a></li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}" aria-label="Last">
+                  <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      {% else %}
+        <div class="text-center py-5">
+          <p class="text-muted mb-0">No insurance claims found.</p>
+          {% if search_term or status_filter %}
+            <p class="text-muted">Try adjusting your search filters.</p>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

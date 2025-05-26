@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  Trợ lý Sức khỏe AI | Healthcare System
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Trợ lý Sức khỏe AI
+        </h1>
+        <button id="reset-chat" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+          <i class="bi bi-arrow-counterclockwise mr-2"></i> Reset Chat
+        </button>
+      </div>
+
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-8">
+          {% for message in messages %}
+            <div class="flex items-center p-4 rounded-xl text-white {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+              <i class="bi bi-info-circle-fill mr-3 text-xl"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Chat Card -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-8 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <div class="flex items-center mb-6">
+          <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center mr-3">
+            <i class="bi bi-robot text-xl"></i>
+          </div>
+          <h5 class="text-xl font-semibold text-blue-900 mb-0">Trợ lý Chẩn đoán Bệnh</h5>
+        </div>
+
+        <div class="chat-container mb-6 max-h-96 overflow-y-auto" id="chat-container">
+          <!-- Initial welcome message -->
+          {% if not chat_history %}
+            <div class="message assistant-message mb-4 max-w-[80%]">
+              <div class="message-content p-4 bg-gray-100 rounded-xl text-gray-900 text-base leading-relaxed">
+                <p>Xin chào, tôi là Trợ lý Sức khỏe AI. Hãy nói "chẩn đoán" để bắt đầu nhập triệu chứng và nhận chẩn đoán bệnh.</p>
+              </div>
+            </div>
+          {% else %}
+            <!-- Display chat history -->
+            {% for message in chat_history %}
+              <div class="message {% if message.role == 'assistant' %}assistant-message mb-4 max-w-[80%]{% else %}user-message mb-4 max-w-[80%] ml-auto{% endif %}">
+                <div class="message-content p-4 {% if message.role == 'assistant' %}bg-gray-100{% else %}bg-blue-600 text-white{% endif %} rounded-xl text-base leading-relaxed">
+                  <p>{{ message.content|linebreaksbr }}</p>
+                  {% if message.show_buttons %}
+                    <div class="mt-3 flex gap-2">
+                      <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="button_response" value="y">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-all duration-300">
+                          Yes
+                        </button>
+                      </form>
+                      <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="button_response" value="n">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border-2 border-gray-500 text-gray-500 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+                          No
+                        </button>
+                      </form>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+        
+        <form id="chat-form" method="post" class="flex gap-3">
+          {% csrf_token %}
+          <input type="text" name="message" id="message-input" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-900 bg-gray-50 text-base focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all duration-300" placeholder="Nhập 'chẩn đoán' để bắt đầu..." required>
+          <button type="submit" class="inline-flex items-center px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow">
+            <i class="bi bi-send mr-2"></i> Gửi
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+    /* Chat container styling */
+    .chat-container {
+      scroll-behavior: smooth;
+    }
+    .chat-container::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+  </style>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatContainer = document.getElementById('chat-container');
+      const messageInput = document.getElementById('message-input');
+      const chatForm = document.getElementById('chat-form');
+      const resetButton = document.getElementById('reset-chat');
+      
+      // Scroll to bottom of chat
+      function scrollToBottom() {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+      
+      // Scroll to bottom on page load
+      scrollToBottom();
+      
+      // Handle form submission
+      chatForm.addEventListener('submit', function() {
+        setTimeout(() => messageInput.value = '', 0);
+      });
+      
+      // Reset chat
+      resetButton.addEventListener('click', function() {
+        if (confirm('Bạn có chắc muốn xóa lịch sử chat? Tất cả cuộc trò chuyện sẽ bị xóa.')) {
+          window.location.href = '{% url 'patient:chat' %}?reset=true';
+        }
+      });
+    });
+  </script>
+{% endblock %}

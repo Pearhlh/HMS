@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  Lab Test Details | Healthcare System
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'doctor:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'doctor:patients' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Patients</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'doctor:patient_detail' patient.id %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">{{ patient.user.get_full_name }}</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Lab Test Details
+          </li>
+        </ol>
+      </nav>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="col-span-2">
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+            <div class="flex justify-between items-center mb-6">
+              <h5 class="text-xl font-semibold text-blue-900 mb-0">{{ test.test_type }} Details</h5>
+              <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full {% if test.status == 'requested' %}bg-yellow-200 text-yellow-800{% elif test.status == 'scheduled' %}bg-blue-200 text-blue-800{% elif test.status == 'in_progress' %}bg-blue-500 text-white{% elif test.status == 'completed' %}bg-green-200 text-green-800{% elif test.status == 'canceled' %}bg-red-200 text-red-800{% else %}bg-gray-200 text-gray-800{% endif %}">
+                {{ test.status|title }}
+              </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <div class="mb-4">
+                  <label class="block text-gray-500 text-sm font-medium mb-1">Test Type</label>
+                  <p class="text-gray-700 text-base">{{ test.test_type }}</p>
+                </div>
+                <div class="mb-4">
+                  <label class="block text-gray-500 text-sm font-medium mb-1">Date Requested</label>
+                  <p class="text-gray-700 text-base">{{ test.created_at|date:"F j, Y" }}</p>
+                </div>
+              </div>
+              <div>
+                <div class="mb-4">
+                  <label class="block text-gray-500 text-sm font-medium mb-1">Status</label>
+                  <p class="text-gray-700 text-base">{{ test.status|title }}</p>
+                </div>
+                {% if test.scheduled_date %}
+                  <div class="mb-4">
+                    <label class="block text-gray-500 text-sm font-medium mb-1">Scheduled Date</label>
+                    <p class="text-gray-700 text-base">{{ test.scheduled_date|date:"F j, Y" }}</p>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="mb-6">
+              <label class="block text-gray-500 text-sm font-medium mb-2">Description</label>
+              <div class="p-4 bg-gray-50 rounded-xl text-gray-700 text-base leading-relaxed">
+                {{ test.description }}
+              </div>
+            </div>
+            
+            <div class="mb-6">
+              <label class="block text-gray-500 text-sm font-medium mb-2">Instructions</label>
+              <div class="p-4 bg-gray-50 rounded-xl text-gray-700 text-base leading-relaxed">
+                {{ test.instructions }}
+              </div>
+            </div>
+            
+            {% if test.results %}
+              <div class="mb-0">
+                <label class="block text-gray-500 text-sm font-medium mb-2">Results</label>
+                <div class="p-4 bg-gray-50 rounded-xl text-gray-700 text-base leading-relaxed">
+                  {{ test.results|linebreaksbr }}
+                </div>
+              </div>
+            {% else %}
+              <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-xl">
+                <div class="flex items-center">
+                  <i class="bi bi-info-circle text-blue-600 text-xl mr-3"></i>
+                  <p class="text-gray-700 text-base mb-0">Test results are not available yet. They will appear here once the test is completed.</p>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-span-1">
+          <!-- Patient Information -->
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 mb-6 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+            <h5 class="text-xl font-semibold text-blue-900 mb-6 text-center">Patient Information</h5>
+            <div class="text-center mb-4">
+              <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto mb-3 text-xl font-semibold">
+                {{ patient.user.first_name|slice:":1" }}{{ patient.user.last_name|slice:":1" }}
+              </div>
+              <h5 class="text-lg font-semibold text-blue-900 mb-1">{{ patient.user.get_full_name }}</h5>
+              <p class="text-gray-600 text-sm mb-0">Patient #{{ patient.id }}</p>
+            </div>
+            
+            <hr class="border-gray-100 my-4">
+            
+            <div class="space-y-3">
+              <div class="grid grid-cols-2 gap-2">
+                <span class="text-gray-500 text-sm font-medium">Date of Birth:</span>
+                <span class="text-gray-700 text-base">{{ patient.date_of_birth|default:"Not specified" }}</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <span class="text-gray-500 text-sm font-medium">Gender:</span>
+                <span class="text-gray-700 text-base">{{ patient.get_gender_display|default:"Not specified" }}</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <span class="text-gray-500 text-sm font-medium">Email:</span>
+                <span class="text-gray-700 text-base">{{ patient.user.email }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+            <h5 class="text-xl font-semibold text-blue-900 mb-6 text-center">Actions</h5>
+            <div class="space-y-3">
+              {% if test.status == 'completed' %}
+                <a href="#" class="inline-flex w-full justify-center items-center px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-base font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow">
+                  <i class="bi bi-file-pdf mr-2"></i> Download Results PDF
+                </a>
+              {% endif %}
+              <a href="{% url 'doctor:patient_detail' patient.id %}" class="inline-flex w-full justify-center items-center px-4 py-3 border-2 border-gray-500 text-gray-500 text-base font-semibold rounded-xl hover:bg-gray-50 hover:text-gray-600 transition-all duration-300">
+                <i class="bi bi-arrow-left mr-2"></i> Back to Patient
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
+{% endblock %}

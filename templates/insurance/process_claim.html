@@ -1,0 +1,58 @@
+<!-- Add this somewhere in your file if it doesn't already exist -->
+
+<form method="post" class="mt-4">
+  {% csrf_token %}
+  
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+      <h5 class="card-title mb-0">Process Claim</h5>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Approval Status</label>
+        <div class="btn-group d-flex" role="group" style="width: 100%;">
+          <input type="radio" class="btn-check" name="approval_status" id="status-approved" value="approved" autocomplete="off">
+          <label class="btn btn-outline-success" for="status-approved">Approve</label>
+          
+          <input type="radio" class="btn-check" name="approval_status" id="status-partial" value="partial" autocomplete="off">
+          <label class="btn btn-outline-primary" for="status-partial">Partial Approval</label>
+          
+          <input type="radio" class="btn-check" name="approval_status" id="status-rejected" value="rejected" autocomplete="off">
+          <label class="btn btn-outline-danger" for="status-rejected">Reject</label>
+        </div>
+      </div>
+      
+      <div id="approval-amount-section" class="mb-3">
+        <label for="approved_amount" class="form-label">Approved Amount ($)</label>
+        <input type="number" class="form-control" id="approved_amount" name="approved_amount" step="0.01" value="{{ claim.claim_amount }}">
+        <div class="form-text">Enter the amount to be covered by insurance</div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="notes" class="form-label">Notes</label>
+        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+      <a href="{% url 'insurance:claim_detail' claim.id %}" class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </div>
+</form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const approvalInputs = document.querySelectorAll('input[name="approval_status"]');
+    const amountSection = document.getElementById('approval-amount-section');
+    
+    approvalInputs.forEach(input => {
+      input.addEventListener('change', function() {
+        if (this.value === 'approved' || this.value === 'partial') {
+          amountSection.style.display = 'block';
+        } else {
+          amountSection.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

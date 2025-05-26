@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Pay Bill | Healthcare System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'patient:dashboard' %}">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'patient:bills' %}">Billing & Payments</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Pay Bill</li>
+    </ol>
+  </nav>
+
+  <h1 class="h3 mb-4">Make Payment</h1>
+  
+  <div class="row">
+    <div class="col-lg-8">
+      <!-- Payment Form -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">Payment Information</h5>
+        </div>
+        <div class="card-body">
+          <form id="payment-form" method="post">
+            {% csrf_token %}
+            
+            <!-- Payment Method Selection -->
+            <div class="mb-4">
+              <label class="form-label">Select Payment Method</label>
+              <div class="row g-2">
+                {% if saved_payment_methods %}
+                  {% for method in saved_payment_methods %}
+                    <div class="col-md-6 mb-2">
+                      <div class="form-check card p-3">
+                        <input class="form-check-input" type="radio" name="payment_method" id="method-{{ method.id }}" value="{{ method.id }}">
+                        <label class="form-check-label" for="method-{{ method.id }}">
+                          <div class="d-flex align-items-center">
+                            {% if method.type == 'credit_card' %}
+                              <i class="bi bi-credit-card fs-4 me-2"></i>
+                              <div>
+                                {{ method.get_card_brand_display }} •••• {{ method.card_last_four }}
+                                <div class="text-muted small">Expires: {{ method.expiry_month }}/{{ method.expiry_year }}</div>
+                              </div>
+                            {% endif %}
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+
+                <!-- Add new card option -->
+                <div class="col-md-6 mb-2">
+                  <div class="form-check card p-3">
+                    <input class="form-check-input" type="radio" name="payment_method" id="method-new-card" value="new_card" {% if not saved_payment_methods %}checked{% endif %}>
+                    <label class="form-check-label" for="method-new-card">
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-plus-circle fs-4 me-2"></i>
+                        <div>
+                          Add New Card
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                
+                <!-- Insurance option -->
+                {% if bill.is_insurance_eligible and patient.insurance_provider %}
+                  <div class="col-md-6 mb-2">
+                    <div class="form-check card p-3">
+                      <input class="form-check-input" type="radio" name="payment_method" id="method-insurance" value="insurance">
+                      <label class="form-check-label" for="method-insurance">
+                        <div class="d-flex align-items-center">
+                          <i class="bi bi-shield-check fs-4 me-2"></i>
+                          <div>
+                            Use Insurance
+                            <div class="text-muted small">{{ patient.insurance_provider }}</div>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <!-- New Card Form -->
+            <div id="new-card-form" class="mb-4 p-3 border rounded {% if saved_payment_methods %}d-none{% endif %}">
+              <h6 class="mb-3">New Card Details</h6>
+              <div class="row">
+                <div class="col-md-12 mb-3">
+                  <label for="cardholder_name" class="form-label">Cardholder Name</label>
+                  <input type="text" id="cardholder_name" name="cardholder_name" class="form-control" value="{{ user.get_full_name }}" required>
+                </div>
+                <div class="col-md-12 mb-3">
+                  <label for="card_number" class="form-label">Card Number</label>
+                  <input type="text" id="card_number" name="card_number" class="form-control" placeholder="1234 5678 9012 3456" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="expiry" class="form-label">Expiration (MM/YY)</label>
+                  <input type="text" id="expiry" name="expiry" class="form-control" placeholder="MM/YY" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="cvv" class="form-label">CVV</label>
+                  <input type="text" id="cvv" name="cvv" class="form-control" placeholder="123" required>
+                </div>
+                <div class="col-12">
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="save_card" name="save_card">
+                    <label class="form-check-label" for="save_card">Save this card for future payments</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Insurance Form -->
+            {% if bill.is_insurance_eligible and patient.insurance_provider %}
+              <div id="insurance-form" class="mb-4 p-3 border rounded d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="mb-0">Insurance Information</h6>
+                </div>
+                
+                <div class="mb-3">
+                  <p class="text-muted mb-1">Insurance Provider</p>
+                  <p class="mb-3 fw-medium">{{ patient.insurance_provider }}</p>
+                  
+                  <p class="text-muted mb-1">Policy Number</p>
+                  <p class="mb-3 fw-medium">{{ patient.insurance_policy_number }}</p>
+                </div>
+                
+                <div class="alert alert-info">
+                  <strong>Note:</strong> By using insurance, you authorize us to submit this claim to your insurance provider. 
+                  You might be responsible for any amount not covered by your insurance.
+                </div>
+              </div>
+            {% endif %}
+            
+            <!-- Submit Button -->
+            <div class="d-grid gap-2">
+              <button type="submit" id="submit-payment" class="btn btn-primary btn-lg">
+                Process Payment
+              </button>
+              <a href="{% url 'patient:bills' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bill Summary -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">Bill Summary</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span>Invoice #:</span>
+            <span class="fw-bold">{{ bill.invoice_number }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span>Due Date:</span>
+            <span {% if bill.is_overdue %}class="text-danger"{% endif %}>{{ bill.due_date|date:"M d, Y" }}</span>
+          </div>
+          
+          <hr>
+          
+          {% if bill.prescription %}
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span>Prescription:</span>
+              <span>#{{ bill.prescription.id }}</span>
+            </div>
+          {% endif %}
+          
+          <hr>
+          
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-bold">Total Amount:</span>
+            <span class="fw-bold">${{ bill.total_amount }}</span>
+          </div>
+          
+          {% if bill.insurance_amount > 0 %}
+            <div class="d-flex justify-content-between align-items-center mb-2 text-success">
+              <span>Insurance Coverage:</span>
+              <span>${{ bill.insurance_amount }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fw-bold">Your Responsibility:</span>
+              <span class="fw-bold">${{ bill.amount_due }}</span>
+            </div>
+          {% endif %}
+          
+          {% if bill.is_insurance_eligible %}
+            <div class="alert alert-info mt-3 mb-0">
+              <small><i class="bi bi-info-circle me-1"></i> This bill is eligible for insurance coverage.</small>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle payment method selection
+    const paymentMethodRadios = document.querySelectorAll('input[name="payment_method"]');
+    const newCardForm = document.getElementById('new-card-form');
+    const insuranceForm = document.getElementById('insurance-form');
+    
+    paymentMethodRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        // Hide all forms first
+        newCardForm.classList.add('d-none');
+        if (insuranceForm) insuranceForm.classList.add('d-none');
+        
+        // Show the selected form
+        if (this.value === 'new_card') {
+          newCardForm.classList.remove('d-none');
+        } else if (this.value === 'insurance') {
+          insuranceForm.classList.remove('d-none');
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

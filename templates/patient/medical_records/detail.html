@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  Medical Record | Healthcare System
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap gap-2 text-sm text-gray-600">
+          <li class="flex items-center">
+            <a href="{% url 'patient:dashboard' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Dashboard</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center">
+            <a href="{% url 'patient:medical_records' %}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">Medical Records</a>
+            <span class="mx-2">/</span>
+          </li>
+          <li class="flex items-center text-gray-900 font-medium">
+            Record Details
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-blue-900">
+          Medical Record
+        </h1>
+        <div>
+          <a href="{% url 'patient:medical_record_pdf' record.id %}" class="inline-flex items-center px-4 py-2 border-2 border-blue-600 text-blue-600 text-base font-semibold rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all duration-300">
+            <i class="bi bi-file-earmark-pdf mr-2"></i> Download PDF
+          </a>
+        </div>
+      </div>
+
+      <!-- Medical Record Details -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-500 mb-1">Date</label>
+              <p class="text-gray-900 text-base">{{ record.record_date|date:"F j, Y" }}</p>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-500 mb-1">Type</label>
+              <p class="text-gray-900 text-base">{{ record.record_type|default:"General Checkup" }}</p>
+            </div>
+          </div>
+          <div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-500 mb-1">Title</label>
+              <p class="text-gray-900 text-base">{{ record.title|default:"Medical Consultation" }}</p>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-500 mb-1">Doctor</label>
+              <p class="text-gray-900 text-base">
+                {% if record.created_by and record.created_by.is_doctor %}
+                  Dr. {{ record.created_by.get_full_name }}
+                {% elif record.doctor %}
+                  Dr. {{ record.doctor.user.get_full_name }}
+                {% else %}
+                  Doctor information not available
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <hr class="border-gray-100 my-6">
+        
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-500 mb-2">Diagnosis</label>
+          <div class="p-4 bg-gray-50 rounded-xl text-gray-900 text-base leading-relaxed">
+            {{ record.diagnosis|linebreaksbr }}
+          </div>
+        </div>
+        
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-500 mb-2">Treatment</label>
+          <div class="p-4 bg-gray-50 rounded-xl text-gray-900 text-base leading-relaxed">
+            {{ record.treatment|linebreaksbr }}
+          </div>
+        </div>
+        
+        {% if record.notes %}
+          <div class="mb-0">
+            <label class="block text-sm font-medium text-gray-500 mb-2">Additional Notes</label>
+            <div class="p-4 bg-gray-50 rounded-xl text-gray-900 text-base leading-relaxed">
+              {{ record.notes|linebreaksbr }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+  </style>
+{% endblock %}

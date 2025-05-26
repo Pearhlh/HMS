@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Update Vitals | Nurse Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-0">Update Vitals</h1>
+      <p class="text-muted mb-0">Patient: {{ patient.user.get_full_name }}</p>
+    </div>
+    <div>
+      <a href="{% url 'nurse:patient_detail' patient.id %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Patient
+      </a>
+    </div>
+  </div>
+  
+  {% if messages %}
+    <div class="messages mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white">
+      <h5 class="card-title mb-0">Record Vital Signs</h5>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5 class="card-title">Temperature & Heart Rate</h5>
+                {{ form.temperature|as_crispy_field }}
+                {{ form.heart_rate|as_crispy_field }}
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5 class="card-title">Blood Pressure</h5>
+                <div class="row">
+                  <div class="col-md-6">{{ form.blood_pressure_systolic|as_crispy_field }}</div>
+                  <div class="col-md-6">{{ form.blood_pressure_diastolic|as_crispy_field }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5 class="card-title">Additional Measurements</h5>
+                {{ form.respiratory_rate|as_crispy_field }}
+                {{ form.oxygen_saturation|as_crispy_field }}
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5 class="card-title">Notes</h5>
+                {{ form.notes|as_crispy_field }}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Care Note for Patient & Physician</h5>
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              This note will be sent as a notification to both the patient and their physician.
+            </div>
+            {{ form.care_note|as_crispy_field }}
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-end">
+          <a href="{% url 'nurse:patient_detail' patient.id %}" class="btn btn-outline-secondary me-2">Cancel</a>
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-save me-2"></i>Save Vitals & Send Care Note
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

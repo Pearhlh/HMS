@@ -1,0 +1,153 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load account %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+  {% trans "Sign In" %}
+{% endblock %}
+
+{% block content_account %}
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-gray-50 to-teal-50 flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-lg">
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 sm:p-12 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slideInUp">
+        <div class="bg-gradient-to-r from-blue-500 to-indigo-400 text-white rounded-t-2xl p-5 sm:p-6 -mx-8 sm:-mx-12 -mt-8 sm:-mt-12">
+          <h3 class="text-white text-xl font-semibold">
+            Sign In
+          </h3>
+        </div>
+        <div class="pt-8">
+          <p class="text-gray-700 text-lg mb-8 leading-relaxed">
+            {% blocktrans %}
+              If you have not created an account yet, then please
+              <a href="{{ signup_url }}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">sign up</a> first.
+            {% endblocktrans %}
+          </p>
+
+          <form class="login space-y-8" method="post" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            <div class="space-y-6">
+              {{ form|crispy }}
+            </div>
+            {% if redirect_field_value %}
+              <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+              <button class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-lg font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-500 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 animate-pulseGlow" type="submit">
+                {% trans "Sign In" %}
+              </button>
+              <a class="text-blue-600 hover:text-blue-800 text-lg font-medium transition-colors duration-200" href="{% url 'account_reset_password' %}">
+                {% trans "Forgot Password?" %}
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Forcefully remove underlines from all <a> tags */
+    a {
+      text-decoration: none !important;
+    }
+    /* Custom animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.5);
+      }
+    }
+    .animate-slideInUp {
+      animation: slideInUp 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    /* Reduced motion override */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-slideInUp, .animate-pulseGlow {
+        animation: none;
+      }
+    }
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      a {
+        color: #1e40af;
+      }
+    }
+    /* Custom styling for crispy forms inputs */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin-bottom: 0.5rem;
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      font-size: 1.125rem;
+      color: #1e3a8a;
+      background-color: #f9fafb;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .form-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-check-input {
+      width: 1.25rem;
+      height: 1.25rem;
+      margin: 0;
+    }
+    .form-check-label {
+      font-size: 1rem;
+      color: #1e3a8a;
+    }
+    .asteriskField {
+      color: #dc2626;
+      margin-left: 0.25rem;
+    }
+    .helptext {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+      display: block;
+    }
+    .errorlist {
+      color: #dc2626;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      list-style: none;
+      padding: 0;
+    }
+    h3{
+      color:white;
+    }
+  </style>
+{% endblock %}

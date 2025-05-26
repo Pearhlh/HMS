@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "description": "Knowledge base cho AI chẩn đoán bệnh, bao gồm 15 bệnh phổ biến với triệu chứng, xét nghiệm, điều trị, và lời khuyên.",
+  "source": "Dựa trên thông tin y tế từ WHO, CDC, và các bệnh viện Việt Nam.",
+  "last_updated": "2025-05-20",
+  "language": "Vietnamese",
+  "contact": "admin@healthai.vn"
+}
